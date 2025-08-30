@@ -45,7 +45,7 @@ function Navbar() {
   return (
     <div
       id="navbar"
-      className="h-[50px] flex flex-row justify-between items-center relative"
+      className="h-[30px] flex flex-row justify-between items-center relative"
     >
       <button onClick={handleGoBack}>
         <FiChevronLeft className="text-[1.3em] translate-x-[-5px]" />
@@ -57,7 +57,7 @@ function Navbar() {
       
       <div className="relative ">
         <button onClick={() => setShowMenu(!showMenu)} className="translate-y-[-10px]">
-          <div className="flex flex-col gap-2 w-[20px]">
+          <div className="flex flex-col gap-1 w-[20px]">
             <div className="h-[2px] bg-white"></div>
             <div className="h-[2px] bg-white"></div>
           </div>
