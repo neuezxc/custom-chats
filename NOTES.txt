@@ -1,0 +1,21 @@
+diba yung llm always response with <Emotion="..."> but hindi naka show sa mismong chat, naka show lang to sa gallery mode.
+Implement:
+- User allowed to enable it, and makikita rin sa character chat bubble yung image.
+
+i notice na, allowed lang si user makapag input ng 5 images.
+- Expand it to permanent or no max.
+
+
+
+Also isa pa sa nanotice, ko na kapag mag seselect si user, if default mode, gallery mode, or emotion mode, user just allowed to choose one.
+- Implement user, pwede na mag select ng kahit anong mode.
+
+
+
+Remove system prompt for emotions if, empty yung emotion mode or walang ininput si user nakahit anong image don.
+
+
+
+
+Instead na nakabase lang tayo sa url tags, allowed nanatin si user makapag input ng name ng emotion image.
+so any image link is compatible.

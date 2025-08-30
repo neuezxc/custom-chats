@@ -1,0 +1,1 @@
+Let's build a Character AI–style chat app where users can talk to AI characters. Use Next.js + Tailwind for UI, Zustand + localStorage for state and persistence, and integrate live AI responses via OpenRouter/Gemini. Make sure chats persist after refresh.
