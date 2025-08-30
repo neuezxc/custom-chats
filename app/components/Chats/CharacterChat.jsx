@@ -1,8 +1,9 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import useChatStore from "../../../stores/useChatStore";
 import { FiRotateCcw, FiLoader } from "react-icons/fi";
 import MessageVersionControls from "../MessageVersionControls";
 import { detectEmotionFromResponse, removeEmotionTags } from "../../utils/emotionUtils";
+import DraggableImagePopup from "../DraggableImagePopup";
 
 function CharacterChat({ message, character, isLatest = false, isRegenerating: isMessageRegenerating = false }) {
   const { 
@@ -15,6 +16,8 @@ function CharacterChat({ message, character, isLatest = false, isRegenerating: i
     updateLastLLMResponse,
     setCharacterEmotion
   } = useChatStore();
+  
+  const [showImagePopup, setShowImagePopup] = useState(false);
   
   // Handle regenerate button click (legacy support)
   const handleRegenerate = async () => {
@@ -109,13 +112,14 @@ function CharacterChat({ message, character, isLatest = false, isRegenerating: i
     <div id="character-chat" className="flex flex-row gap-3 animate-fade-in group">
       <div
         id="character-icon"
-        className="h-[50px] w-[50px] rounded-[var(--border-radius)] bg-[var(--grey-0)] flex-shrink-0 flex items-center justify-center overflow-hidden"
+        className="h-[50px] w-[50px] rounded-[var(--border-radius)] bg-[var(--grey-0)] flex-shrink-0 flex items-center justify-center overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+        onClick={() => character.avatar && setShowImagePopup(true)}
       >
         {character.avatar ? (
           <img
             src={character.avatar}
             alt={character.name}
-            className="max-w-full max-h-full object-contain"
+            className="object-fill"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70 rounded-[var(--border-radius)] flex items-center justify-center text-white font-semibold text-lg">
@@ -123,6 +127,16 @@ function CharacterChat({ message, character, isLatest = false, isRegenerating: i
           </div>
         )}
       </div>
+      
+      {/* Draggable Image Popup */}
+      {character.avatar && (
+        <DraggableImagePopup
+          isOpen={showImagePopup}
+          onClose={() => setShowImagePopup(false)}
+          imageSrc={character.avatar}
+          altText={`${character.name} avatar`}
+        />
+      )}
       
       <div id="character-bubble" className="flex-1 max-w-[80%] relative">
         {message.isTyping ? (
