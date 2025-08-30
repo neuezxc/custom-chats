@@ -407,10 +407,10 @@ function CharacterManager() {
   if (!showCharacterManager) return null
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
-      <div className="bg-[var(--dark-1)] border border-[var(--grey-0)] rounded-lg w-full max-w-4xl h-[90vh] flex flex-col">
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-0 sm:p-4">
+      <div className="bg-[var(--dark-1)] border border-[var(--grey-0)] rounded-none sm:rounded-lg w-full h-full sm:max-w-4xl sm:h-[90vh] flex flex-col">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-[var(--grey-0)]">
+        <div className="flex items-center justify-between p-4 sm:p-6 border-b border-[var(--grey-0)] flex-shrink-0">
           <div className="flex items-center gap-3">
             <FiUser size={20} className="text-[var(--primary)]" />
             <div>
@@ -436,20 +436,20 @@ function CharacterManager() {
         </div>
 
         {/* Content */}
-        <div className="flex-1 overflow-y-auto p-6">
+        <div className="flex-1 overflow-y-auto p-4 sm:p-6">
           {characterManagerMode === 'list' && (
             <div className="space-y-6">
               {/* Import/Export Controls */}
-              <div className="flex flex-wrap gap-3">
+              <div className="flex flex-col sm:flex-row flex-wrap gap-3">
                 <button
                   onClick={() => setCharacterManagerMode('create')}
-                  className="bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-medium"
-                >
+                  className="bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center sm:justify-start gap-2 font-medium"
+                > 
                   <FiPlus size={16} /> Create Character
                 </button>
                 <button
                   onClick={() => fileInputRef.current?.click()}
-                  className="bg-[var(--dark-2)] hover:bg-[var(--dark-3)] text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2"
+                  className="bg-[var(--dark-2)] hover:bg-[var(--dark-3)] text-white px-4 py-2 rounded-lg transition-colors flex items-center justify-center sm:justify-start gap-2"
                 >
                   <FiUpload size={16} /> Import
                 </button>
@@ -463,99 +463,106 @@ function CharacterManager() {
               </div>
 
               {/* Character Grid */}
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div className="flex flex-row flex-wrap gap-2">
                 {Object.values(characters).map((character) => (
                   <div
                     key={character.id}
-                    className={`group relative p-5 rounded-lg border transition-all duration-200 cursor-pointer hover:scale-[1.02] ${
+
+                    className={`group relative rounded-lg border transition-all duration-200 cursor-pointer overflow-hidden basis-[calc(50%-0.5rem)] lg:basis-[calc(25%-0.75rem)]  ${
                       character.id === currentCharacter.id
                         ? 'border-[var(--primary)] bg-[var(--primary)]/10 shadow-lg'
-                        : 'border-[var(--grey-0)] bg-[var(--dark-2)] hover:border-[var(--primary)]/50 hover:bg-[var(--dark-2)]/80'
+                        : 'border-[var(--grey-0)] bg-[var(--dark-2)] md:hover:border-[var(--primary)]/50'
                     }`}
                     onClick={() => selectCharacter(character.id)}
                   >
-                    {/* Character Info */}
-                    <div className="mb-4">
-                      {/* Avatar and Name Row */}
-                      <div className="flex items-start gap-3 mb-3">
-                        <div className="w-12 h-12 rounded-full overflow-hidden bg-[var(--grey-0)] flex-shrink-0 flex items-center justify-center">
-                          {character.avatar ? (
-                            <img
-                              src={character.avatar}
-                              alt={character.name}
-                              className="w-full h-full object-cover"
-                            />
-                          ) : (
-                            <div className="w-full h-full bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70 rounded-full flex items-center justify-center text-white font-semibold text-sm">
-                              {character.name?.charAt(0)?.toUpperCase() || 'A'}
-                            </div>
-                          )}
+                    {/* <!-- 
+                      DESIGN RATIONALE: Hero Image
+                      The avatar is now a full-width banner using aspect-ratio to create a strong visual anchor. 
+                      This immediately establishes the character's identity and creates a more engaging, gallery-like feel.
+                      The image is the hero of the card.
+                    --> */}
+                    <div className="relative aspect-square w-full bg-[var(--dark-3)]">
+                      {character.avatar ? (
+                        <img
+                          src={character.avatar}
+                          alt={character.name}
+                          className="w-full h-full object-cover"
+                        />
+                      ) : (
+                        <div className="w-full h-full bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70 flex items-center justify-center text-white font-bold text-4xl">
+                          {character.name?.charAt(0)?.toUpperCase() || 'A'}
                         </div>
-                        <div className="flex-1 min-w-0">
-                          <div className="flex items-center justify-between mb-1">
-                            <h3 className="text-lg font-semibold text-white truncate">
-                              {character.name}
-                            </h3>
-                            {character.id === currentCharacter.id && (
-                              <span className="text-xs bg-[var(--primary)] text-white px-2 py-1 rounded-full font-medium flex-shrink-0">
-                                Active
-                              </span>
-                            )}
-                          </div>
-                          <p className="text-[var(--grey-1)] text-sm line-clamp-2 leading-relaxed">
-                            {character.description || 'No description provided'}
-                          </p>
-                        </div>
+                      )}
+                      {/* <!-- 
+                        DESIGN RATIONALE: Integrated Title
+                        Overlaying the name on the image with a subtle gradient creates a more professional, integrated look.
+                        It saves vertical space and connects the text directly to the visual.
+                      --> */}
+                      <div className="absolute bottom-0 left-0 right-0 p-4 bg-gradient-to-t from-black/60 to-transparent">
+                        <h3 className="text-lg font-semibold text-white truncate">
+                          {character.name}
+                        </h3>
                       </div>
+                      {character.id === currentCharacter.id && (
+                        <span className="absolute top-2 right-2 text-xs bg-[var(--primary)] text-white px-2 py-1 rounded-full font-medium flex-shrink-0">
+                          Active
+                        </span>
+                      )}
                     </div>
 
-                    {/* Stats */}
-                    <div className="flex items-center justify-between text-xs text-[var(--grey-2)] mb-4">
-                      <div className="flex items-center gap-1">
-                        <FiBook size={12} />
-                        <span>{character.lorebook?.length || 0} entries</span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <FiMessageCircle size={12} />
-                        <span>{character.firstMessage ? 'Has intro' : 'No intro'}</span>
-                      </div>
-                    </div>
+                    <div className="p-4">
+                      <p className="text-[var(--grey-1)] text-sm line-clamp-2 leading-relaxed mb-4 h-10">
+                        {character.description || 'No description provided'}
+                      </p>
 
-                    {/* Action Buttons */}
-                    <div className="flex justify-end gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          setEditingCharacterId(character.id)
-                          setCharacterManagerMode('edit')
-                        }}
-                        className="p-2 bg-[var(--dark-1)] hover:bg-[var(--primary)] text-[var(--grey-1)] hover:text-white rounded-md transition-colors"
-                        title="Edit Character"
-                      >
-                        <FiEdit size={14} />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          handleExportCharacter(character.id)
-                        }}
-                        className="p-2 bg-[var(--dark-1)] hover:bg-[var(--primary)] text-[var(--grey-1)] hover:text-white rounded-md transition-colors"
-                        title="Export Character"
-                      >
-                        <FiDownload size={14} />
-                      </button>
-                      <button
-                        onClick={(e) => {
-                          e.stopPropagation()
-                          if (confirm(`Are you sure you want to delete "${character.name}"?`)) {
-                            deleteCharacter(character.id)
-                          }
-                        }}
-                        className="p-2 bg-[var(--dark-1)] hover:bg-red-600 text-[var(--grey-1)] hover:text-white rounded-md transition-colors"
-                        title="Delete Character"
-                      >
-                        <FiTrash2 size={14} />
-                      </button>
+                      {/* Stats */}
+                      <div className="flex items-center justify-start text-xs text-[var(--grey-2)] mb-4">
+                        <div className="flex items-center gap-1">
+                          <FiBook size={12} />
+                          <span>{character.lorebook?.length || 0} entries</span>
+                        </div>
+                      </div>
+
+                      {/* <!-- 
+                        DESIGN RATIONALE: Always-Visible Actions on Mobile
+                        Actions are now permanently visible to ensure accessibility on touch devices, 
+                        while the hover effect is preserved for a cleaner look on desktop (md and up).
+                      --> */}
+                      <div className="flex justify-end gap-1 opacity-100 md:opacity-0 md:group-hover:opacity-100 transition-opacity">
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            setEditingCharacterId(character.id)
+                            setCharacterManagerMode('edit')
+                          }}
+                          className="p-2 bg-[var(--dark-1)] hover:bg-[var(--primary)] text-[var(--grey-1)] hover:text-white rounded-md transition-colors"
+                          title="Edit Character"
+                        >
+                          <FiEdit size={14} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            handleExportCharacter(character.id)
+                          }}
+                          className="p-2 bg-[var(--dark-1)] hover:bg-[var(--primary)] text-[var(--grey-1)] hover:text-white rounded-md transition-colors"
+                          title="Export Character"
+                        >
+                          <FiDownload size={14} />
+                        </button>
+                        <button
+                          onClick={(e) => {
+                            e.stopPropagation()
+                            if (confirm(`Are you sure you want to delete "${character.name}"?`)) {
+                              deleteCharacter(character.id)
+                            }
+                          }}
+                          className="p-2 bg-[var(--dark-1)] hover:bg-red-600 text-[var(--grey-1)] hover:text-white rounded-md transition-colors"
+                          title="Delete Character"
+                        >
+                          <FiTrash2 size={14} />
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
@@ -587,7 +594,7 @@ function CharacterManager() {
               </div>
 
               {/* Character Form */}
-              <div className="bg-[var(--dark-2)] rounded-lg p-6 border border-[var(--grey-0)]">
+              <div className="bg-[var(--dark-2)] rounded-lg p-4 sm:p-6 border border-[var(--grey-0)]">
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 mb-6">
                     <FiUser size={20} className="text-[var(--primary)]" />
@@ -627,7 +634,7 @@ function CharacterManager() {
                     <textarea
                       value={editForm.description}
                       onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
-                      className="w-full p-3 bg-[var(--dark-1)] border border-[var(--grey-0)] rounded-lg text-white placeholder-[var(--grey-2)] focus:border-[var(--primary)] outline-none transition-colors h-[300px] resize-y"
+                      className="w-full p-3 bg-[var(--dark-1)] border border-[var(--grey-0)] rounded-lg text-white placeholder-[var(--grey-2)] focus:border-[var(--primary)] outline-none transition-colors h-48 sm:h-[300px] resize-y"
                       placeholder="Describe your character's personality, background, and role (e.g., A friendly AI assistant, A wise sorceress from the realm of Ethereal...)"
                     />
                     <p className="text-xs text-[var(--grey-1)] mt-1">
@@ -638,7 +645,7 @@ function CharacterManager() {
               </div>
 
               {/* Message Configuration */}
-              <div className="bg-[var(--dark-2)] rounded-lg p-6 border border-[var(--grey-0)]">
+              <div className="bg-[var(--dark-2)] rounded-lg p-4 sm:p-6 border border-[var(--grey-0)]">
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 mb-6">
                     <FiMessageCircle size={20} className="text-[var(--primary)]" />
@@ -653,7 +660,7 @@ function CharacterManager() {
                     <textarea
                       value={editForm.firstMessage}
                       onChange={(e) => setEditForm(prev => ({ ...prev, firstMessage: e.target.value }))}
-                      className="w-full p-3 bg-[var(--dark-1)] border border-[var(--grey-0)] rounded-lg text-white placeholder-[var(--grey-2)] focus:border-[var(--primary)] outline-none transition-colors h-[300px] resize-y"
+                      className="w-full p-3 bg-[var(--dark-1)] border border-[var(--grey-0)] rounded-lg text-white placeholder-[var(--grey-2)] focus:border-[var(--primary)] outline-none transition-colors h-48 sm:h-[300px] resize-y"
                       placeholder="The character's opening message when starting a new conversation..."
                     />
                     <p className="text-xs text-[var(--grey-1)] mt-1">
@@ -680,7 +687,7 @@ function CharacterManager() {
               </div>
 
               {/* Image Gallery Section */}
-              <div className="bg-[var(--dark-2)] rounded-lg p-6 border border-[var(--grey-0)]">
+              <div className="bg-[var(--dark-2)] rounded-lg p-4 sm:p-6 border border-[var(--grey-0)]">
                 <div className="space-y-6">
                   <div className="flex items-center gap-3 mb-6">
                     <FiImage size={20} className="text-[var(--primary)]" />
@@ -776,7 +783,7 @@ function CharacterManager() {
                         <span className="text-white">Enable image compression (recommended)</span>
                       </label>
                       {compressionSettings.enabled && (
-                        <div className="grid grid-cols-3 gap-3 pl-6">
+                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pl-6">
                           <div>
                             <label className="block text-xs text-[var(--grey-1)] mb-1">Max Width</label>
                             <input
@@ -825,9 +832,9 @@ function CharacterManager() {
 
               {/* Lorebook Management (only in edit mode) */}
               {characterManagerMode === 'edit' && editingCharacterId && (
-                <div className="bg-[var(--dark-2)] rounded-lg p-6 border border-[var(--grey-0)]">
+                <div className="bg-[var(--dark-2)] rounded-lg p-4 sm:p-6 border border-[var(--grey-0)]">
                   <div className="space-y-6">
-                    <div className="flex items-center justify-between">
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
                       <div className="flex items-center gap-3">
                         <FiBook size={20} className="text-[var(--primary)]" />
                         <div>
@@ -837,7 +844,7 @@ function CharacterManager() {
                       </div>
                       <button
                         onClick={() => setShowLorebookForm(true)}
-                        className="bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-medium"
+                        className="bg-[var(--primary)] hover:bg-[var(--primary)]/90 text-white px-4 py-2 rounded-lg transition-colors flex items-center gap-2 font-medium w-full sm:w-auto justify-center"
                       >
                         <FiPlus size={16} /> Add Entry
                       </button>
@@ -891,8 +898,8 @@ function CharacterManager() {
                           </p>
                         </div>
                         
-                        <div className="flex items-center justify-between pt-2">
-                          <label className="flex items-center gap-2 text-sm text-white">
+                        <div className="flex flex-col sm:flex-row items-center justify-between pt-2 gap-4">
+                          <label className="flex items-center gap-2 text-sm text-white w-full sm:w-auto">
                             <input
                               type="checkbox"
                               checked={newLorebookEntry.isActive}
@@ -901,20 +908,20 @@ function CharacterManager() {
                             />
                             <span>Active Entry</span>
                           </label>
-                          <div className="flex gap-3">
+                          <div className="flex gap-3 w-full sm:w-auto">
                             <button
                               onClick={() => {
                                 setShowLorebookForm(false)
                                 setEditingLorebookId(null)
                                 setNewLorebookEntry(getDefaultLorebookEntry())
                               }}
-                              className="px-4 py-2 bg-[var(--dark-2)] text-[var(--grey-1)] rounded-lg hover:bg-[var(--dark-3)] hover:text-white transition-colors"
+                              className="w-full sm:w-auto px-4 py-2 bg-[var(--dark-2)] text-[var(--grey-1)] rounded-lg hover:bg-[var(--dark-3)] hover:text-white transition-colors"
                             >
                               Cancel
                             </button>
                             <button
                               onClick={handleAddLorebookEntry}
-                              className="px-4 py-2 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary)]/90 transition-colors font-medium"
+                              className="w-full sm:w-auto px-4 py-2 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary)]/90 transition-colors font-medium"
                             >
                               {editingLorebookId ? 'Update Entry' : 'Add Entry'}
                             </button>
@@ -931,8 +938,8 @@ function CharacterManager() {
                             key={entry.id}
                             className="bg-[var(--dark-1)] p-4 rounded-lg border border-[var(--grey-0)] hover:border-[var(--primary)]/30 transition-colors"
                           >
-                            <div className="flex items-start justify-between">
-                              <div className="flex-1">
+                            <div className="flex flex-col sm:flex-row items-start justify-between">
+                              <div className="flex-1 mb-3 sm:mb-0">
                                 <div className="flex items-center gap-2 mb-2">
                                   <h4 className="font-medium text-white">{entry.name}</h4>
                                   {entry.isActive ? (
@@ -957,7 +964,7 @@ function CharacterManager() {
                                 </div>
                                 <p className="text-sm text-[var(--grey-1)] leading-relaxed">{entry.description}</p>
                               </div>
-                              <div className="flex gap-2 ml-4">
+                              <div className="flex gap-2 ml-0 sm:ml-4 self-end sm:self-start">
                                 <button
                                   onClick={() => handleEditLorebookEntry(entry)}
                                   className="p-2 bg-[var(--dark-2)] hover:bg-[var(--primary)] text-[var(--grey-1)] hover:text-white rounded-md transition-colors"
@@ -993,7 +1000,7 @@ function CharacterManager() {
               )}
 
               {/* Action Buttons */}
-              <div className="flex gap-3 pt-6">
+              <div className="flex flex-col sm:flex-row gap-3 pt-6">
                 <button
                   onClick={() => {
                     // Clean up image preview URLs to prevent memory leaks
