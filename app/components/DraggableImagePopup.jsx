@@ -88,14 +88,10 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
 
     if (isOpen) {
       document.addEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'unset';
     }
 
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = 'unset';
     };
   }, [isOpen, onClose]);
 
@@ -141,6 +137,7 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
       const widthDiff = e.clientX - resizeStart.x;
       const heightDiff = e.clientY - resizeStart.y;
       
+      // Clip the size to reasonable bounds
       const newWidth = Math.max(150, Math.min(resizeStart.width + widthDiff, window.innerWidth - 20));
       const newHeight = Math.max(150, Math.min(resizeStart.height + heightDiff, window.innerHeight - 20));
       
@@ -234,6 +231,7 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
       const widthDiff = touch.clientX - resizeStart.x;
       const heightDiff = touch.clientY - resizeStart.y;
       
+      // Clip the size to reasonable bounds
       const newWidth = Math.max(150, Math.min(resizeStart.width + widthDiff, window.innerWidth - 20));
       const newHeight = Math.max(150, Math.min(resizeStart.height + heightDiff, window.innerHeight - 20));
       
@@ -263,10 +261,17 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
 
   // Add global mouse/touch event listeners
   useEffect(() => {
-    document.addEventListener('mousemove', handleMouseMove);
-    document.addEventListener('mouseup', handleMouseUp);
-    document.addEventListener('touchmove', handleTouchMove, { passive: false });
-    document.addEventListener('touchend', handleTouchEnd);
+    if (isDragging || isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.addEventListener('touchmove', handleTouchMove, { passive: false });
+      document.addEventListener('touchend', handleTouchEnd);
+    } else {
+      document.removeEventListener('mousemove', handleMouseMove);
+      document.removeEventListener('mouseup', handleMouseUp);
+      document.removeEventListener('touchmove', handleTouchMove);
+      document.removeEventListener('touchend', handleTouchEnd);
+    }
     
     return () => {
       document.removeEventListener('mousemove', handleMouseMove);
@@ -324,11 +329,11 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
 
   return (
     <div 
-      className="fixed inset-0 z-50 touch-none"
+      className="fixed inset-0 z-50 pointer-events-none"
     >
       <div
         ref={popupRef}
-        className="absolute bg-[#1a1a1a]/80 backdrop-blur-xl rounded-xl shadow-2xl border border-[#333] overflow-hidden flex flex-col"
+        className="absolute bg-[#1a1a1a]/80 backdrop-blur-xl rounded-xl shadow-2xl border border-[#333] overflow-hidden flex flex-col pointer-events-auto"
         style={{
           left: `${position.x}px`,
           top: `${position.y}px`,
