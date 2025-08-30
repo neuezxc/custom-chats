@@ -111,7 +111,7 @@ function UserChat({ message, messageIndex, isLastUserMessage }) {
           <>
             <div 
               id="user-text" 
-              className="text-start prose prose-sm max-w-none text-white"
+              className="text-start prose prose-xs sm:prose-sm max-w-none text-white"
             >
               <div
                 dangerouslySetInnerHTML={{

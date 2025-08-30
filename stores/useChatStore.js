@@ -179,23 +179,18 @@ const useChatStore = create(
           { id: 'gemini-2.5-pro', name: 'Gemini 2.5 Pro' },
           { id: 'gemini-2.5-flash', name: 'Gemini 2.5 Flash' },
           { id: 'gemini-2.5-flash-lite', name: 'Gemini 2.5 Flash Lite' },
-          { id: 'gemini-2.0-flash', name: 'Gemini 2.0 Flash' },
-          { id: 'gemini-1.5-pro', name: 'Gemini 1.5 Pro' },
-          { id: 'gemini-1.5-flash', name: 'Gemini 1.5 Flash' }
         ],
         openrouter: [
-          { id: 'deepseek/deepseek-chat-v3.1:free', name: 'DeepSeek: DeepSeek V3.1 (free)'},
-          { id: 'deepseek/deepseek-r1-0528:free', name: 'DeepSeek: R1 0528 (free)' },
-          { id: 'deepseek/deepseek-chat-v3-0324:free', name: 'DeepSeek: DeepSeek V3 0324 (free)' },
+          { id: 'deepseek/deepseek-chat-v3.1:free', name: 'DeepSeek V3.1 (free)'},
+          { id: 'deepseek/deepseek-r1-0528:free', name: 'R1 0528 (free)' },
+          { id: 'deepseek/deepseek-chat-v3-0324:free', name: 'DeepSeek V3 0324 (free)' },
           { id: 'deepseek/deepseek-r1:free', name: 'DeepSeek: R1 (free)' },
-          { id: 'qwen/qwen3-coder:free', name: 'Qwen: Qwen3 Coder (free)' },
-          { id: 'tngtech/deepseek-r1t2-chimera:free', name: 'TNG: DeepSeek R1T2 Chimera (free)' },
-          { id: 'z-ai/glm-4.5-air:free', name: 'Z.AI: GLM 4.5 Air (free)' },
-          { id: 'tngtech/deepseek-r1t-chimera:free', name: 'TNG: DeepSeek R1T Chimera (free)' },
-          { id: 'moonshotai/kimi-k2:free', name: 'MoonshotAI: Kimi K2 (free)' },
-          { id: 'qwen/qwen3-235b-a22b:free', name: 'Qwen: Qwen3 235B A22B (free)' },
-          { id: 'google/gemini-2.0-flash-exp:free', name: 'Google: Gemini 2.0 Flash Experimental (free)' },
-          { id: 'meta-llama/llama-3.3-70b-instruct:free', name: 'Meta: Llama 3.3 70B Instruct (free)' }
+          { id: 'qwen/qwen3-coder:free', name: 'Qwen3 Coder (free)' },
+          { id: 'tngtech/deepseek-r1t2-chimera:free', name: 'DeepSeek R1T2 Chimera (free)' },
+          { id: 'z-ai/glm-4.5-air:free', name: 'GLM 4.5 Air (free)' },
+          { id: 'tngtech/deepseek-r1t-chimera:free', name: 'DeepSeek R1T Chimera (free)' },
+          { id: 'moonshotai/kimi-k2:free', name: 'Kimi K2 (free)' },
+          { id: 'qwen/qwen3-235b-a22b:free', name: 'Qwen3 235B A22B (free)' },
         ]
       },
 

@@ -145,7 +145,7 @@ function CharacterChat({ message, character, isLatest = false, isRegenerating: i
               <>
                 <div 
                   id="character-text" 
-                  className={`prose prose-sm max-w-none ${
+                  className={`prose prose-xs sm:prose-sm max-w-none ${
                     message.isError ? 'text-red-400' : 'text-white'
                   }`}
                 >

@@ -55,8 +55,8 @@ function Navbar() {
         {currentCharacter.name}
       </div>
       
-      <div className="relative">
-        <button onClick={() => setShowMenu(!showMenu)}>
+      <div className="relative ">
+        <button onClick={() => setShowMenu(!showMenu)} className="translate-y-[-10px]">
           <div className="flex flex-col gap-2 w-[20px]">
             <div className="h-[2px] bg-white"></div>
             <div className="h-[2px] bg-white"></div>
@@ -65,7 +65,7 @@ function Navbar() {
         
         {/* Dropdown Menu */}
         {showMenu && (
-          <div className="absolute right-0 top-[calc(100%+8px)] bg-[var(--dark-1)] border border-[var(--grey-0)] rounded-[var(--border-radius)] shadow-lg py-2 w-[220px] z-10">
+          <div className="absolute right-0 bg-[var(--dark-1)] border border-[var(--grey-0)] rounded-[var(--border-radius)] shadow-lg py-2 w-[220px] z-10">
             <button
               onClick={handleNewChat}
               className="w-full px-4 py-2 text-left hover:bg-[var(--dark-2)] flex items-center gap-3"

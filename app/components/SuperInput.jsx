@@ -64,7 +64,7 @@ function SuperInput() {
         onChange={(e) => setMessage(e.target.value)}
         onKeyPress={handleKeyPress}
         disabled={isTyping}
-        className="flex-1 p-4 resize-none min-h-[60px] max-h-[200px] overflow-y-auto bg-transparent outline-none disabled:opacity-50"
+        className="flex-1 p-4 resize-none min-h-[60px] max-h-[100px] overflow-y-auto bg-transparent outline-none disabled:opacity-50"
         placeholder={hasApiKey ? "Enter to send chat (type / for shortcuts)" : "Configure API key in settings to start chatting"}
       />
 
@@ -80,14 +80,16 @@ function SuperInput() {
             {/* Custom System Prompt Quick Access */}
             <button
               onClick={() => setShowCustomSystemPrompt(true)}
-              className={`flex items-center gap-1 px-2 py-1 rounded text-xs transition-colors ${customSystemPrompt.enabled
+              className={`flex items-center gap-1 px-2 h-[30px] rounded text-xs transition-colors ${customSystemPrompt.enabled
                 ? 'bg-[var(--primary)] text-white'
                 : 'bg-[var(--dark-2)] border border-[var(--grey-0)] text-[var(--grey-1)] hover:text-white hover:border-[var(--grey-1)]'
                 }`}
               title={customSystemPrompt.enabled ? 'Custom prompt active - click to edit' : 'Set custom system prompt'}
             >
               <FiCode size={12} />
-              {customSystemPrompt.enabled ? 'Custom' : 'Prompt'}
+              <span className="lg:inline hidden">
+                {customSystemPrompt.enabled ? 'Custom' : 'Prompt'}
+              </span>
             </button>
 
             <div title={statusTitle} className="hidden">

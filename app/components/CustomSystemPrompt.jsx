@@ -300,7 +300,7 @@ You can use {{char}} for character name, {{char_description}} for full descripti
                 className="flex-1 flex items-center justify-center gap-2 px-6 py-2 bg-[var(--primary)] text-white rounded-lg hover:bg-[var(--primary)]/90 transition-colors"
               >
                 <FiSave size={16} />
-                {localContent.trim() === '' ? 'Disable Custom Prompt' : 'Save Custom Prompt'}
+                {localContent.trim() === '' ? 'Disable' : 'Save'}
               </button>
             </div>
           </div>
