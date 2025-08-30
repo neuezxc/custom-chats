@@ -14,6 +14,7 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
   const [isAnimating, setIsAnimating] = useState(false);
   const [rotation, setRotation] = useState(0);
   const [scale, setScale] = useState(1);
+  const [opacity, setOpacity] = useState(1);
   const popupRef = useRef(null);
   const headerRef = useRef(null);
   const resizeHandleRef = useRef(null);
@@ -27,23 +28,28 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
       timer = setTimeout(() => {
         setIsVisible(true);
         setIsAnimating(true);
-        setScale(0.8);
-        setRotation(5);
-        // Add smooth bounce effect
+        setScale(0.3);
+        setOpacity(0);
+        setRotation(10);
+        // Add smooth bounce effect with spring physics
         setTimeout(() => {
-          setScale(1.1);
-          setRotation(-3);
+          setScale(1.2);
+          setOpacity(1);
+          setRotation(-5);
           setTimeout(() => {
-            setIsAnimating(false);
             setScale(1);
             setRotation(0);
+            setTimeout(() => {
+              setIsAnimating(false);
+            }, 150);
           }, 300);
-        }, 200);
+        }, 150);
       }, 1000);
     } else {
       setIsAnimating(true);
       setScale(0.8);
-      setRotation(5);
+      setOpacity(0);
+      setRotation(10);
       timer = setTimeout(() => {
         setIsVisible(false);
       }, 500);
@@ -149,11 +155,14 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
     // Add bounce effect when releasing drag
     if (isDragging) {
       setIsAnimating(true);
-      setScale(0.95);
+      setScale(0.98);
       setTimeout(() => {
-        setIsAnimating(false);
-        setScale(1);
-      }, 200);
+        setScale(1.05);
+        setTimeout(() => {
+          setScale(1);
+          setIsAnimating(false);
+        }, 150);
+      }, 100);
     }
     setIsDragging(false);
     setIsResizing(false);
@@ -239,11 +248,14 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
     // Add bounce effect when releasing touch drag
     if (isDragging) {
       setIsAnimating(true);
-      setScale(0.95);
+      setScale(0.98);
       setTimeout(() => {
-        setIsAnimating(false);
-        setScale(1);
-      }, 200);
+        setScale(1.05);
+        setTimeout(() => {
+          setScale(1);
+          setIsAnimating(false);
+        }, 150);
+      }, 100);
     }
     setIsDragging(false);
     setIsResizing(false);
@@ -272,9 +284,12 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
       setTimeout(() => {
         setPosition(previousState.position);
         setSize(previousState.size);
-        setIsAnimating(false);
-        setScale(1);
-      }, 300);
+        setScale(0.95);
+        setTimeout(() => {
+          setScale(1);
+          setIsAnimating(false);
+        }, 200);
+      }, 200);
       setIsMaximized(false);
     } else {
       // Save current state and maximize with bounce effect
@@ -291,9 +306,12 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
           width: window.innerWidth - 20, 
           height: window.innerHeight - 20 
         });
-        setIsAnimating(false);
-        setScale(1);
-      }, 300);
+        setScale(0.95);
+        setTimeout(() => {
+          setScale(1);
+          setIsAnimating(false);
+        }, 200);
+      }, 200);
       setIsMaximized(true);
     }
   };
@@ -321,10 +339,11 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
           transform: `rotate(${rotation}deg) scale(${scale})`,
           transition: isDragging || isResizing 
             ? 'none' 
-            : 'transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55), box-shadow 0.3s ease',
+            : 'transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.3s ease',
+          opacity: opacity,
           boxShadow: isDragging 
-            ? '0 15px 30px rgba(0, 0, 0, 0.4)' 
-            : '0 8px 25px rgba(0, 0, 0, 0.3)',
+            ? '0 20px 40px rgba(0, 0, 0, 0.5)' 
+            : '0 10px 30px rgba(0, 0, 0, 0.4)',
           zIndex: 1000
         }}
       >
@@ -346,7 +365,7 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
                 e.stopPropagation();
                 rotateImage();
               }}
-              className="p-1.5 rounded-full hover:bg-white/10 transition-colors"
+              className="p-1.5 rounded-full hover:bg-white/10 transition-all duration-200 transform hover:scale-110"
               aria-label="Rotate"
             >
               <FiRotateCw size={16} className="text-white" />
@@ -356,7 +375,7 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
                 e.stopPropagation();
                 toggleMaximize();
               }}
-              className="p-1.5 rounded-full hover:bg-white/10 transition-colors"
+              className="p-1.5 rounded-full hover:bg-white/10 transition-all duration-200 transform hover:scale-110"
               aria-label={isMaximized ? "Minimize" : "Maximize"}
             >
               {isMaximized ? <FiMinimize size={16} className="text-white" /> : <FiMaximize size={16} className="text-white" />}
@@ -366,7 +385,7 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
                 e.stopPropagation();
                 onClose();
               }}
-              className="p-1.5 rounded-full hover:bg-white/10 transition-colors"
+              className="p-1.5 rounded-full hover:bg-white/10 transition-all duration-200 transform hover:scale-110"
               aria-label="Close"
             >
               <FiX size={16} className="text-white" />
@@ -389,7 +408,7 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
               draggable={false}
               style={{
                 transform: `rotate(${-rotation}deg)`,
-                transition: 'transform 0.3s ease'
+                transition: 'transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
               }}
             />
             <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
