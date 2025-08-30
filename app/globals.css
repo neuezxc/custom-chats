@@ -20,6 +20,9 @@ body {
   color: var(--white);
   font-family: "Ubuntu", sans-serif;
   letter-spacing: 0.3px;
+  height: 100dvh;
+  width: 100vw;
+  overflow: hidden;
 }
 textarea {
   outline: none;

@@ -24,8 +24,8 @@ export default function Home() {
     setExpandChats(!expandChats);
   };
   return (
-    <div id="main" className="h-screen w-full py-4">
-      <div id="wrapper" className="sm:mx-[200px] md:mx-[500px] lg:mx-[600px] h-full   flex flex-col gap-4">
+    <div id="main" className="h-[100dvh] w-full py-4">
+      <div id="wrapper" className="sm:mx-[200px] md:mx-[500px] lg:mx-[600px] h-full flex flex-col gap-4">
         <div id="wrapper-content" className="flex-1 mx-[10px] flex flex-col gap-2 h-full">
           <Navbar />
           {expandChats && <Gallery />}
