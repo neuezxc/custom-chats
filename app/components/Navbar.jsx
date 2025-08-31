@@ -1,4 +1,4 @@
-import { FiChevronLeft, FiMenu, FiSettings, FiMessageSquare, FiUser, FiPlus, FiCode, FiUserCheck } from "react-icons/fi";
+import { FiChevronLeft, FiMenu, FiSettings, FiMessageSquare, FiUser, FiPlus, FiCode, FiUserCheck, FiDatabase } from "react-icons/fi";
 import { useState } from "react";
 import useChatStore from "../../stores/useChatStore";
 
@@ -10,6 +10,7 @@ function Navbar() {
     setShowCustomSystemPrompt,
     setShowUserProfileModal,
     setShowDisplaySettingsModal,
+    setShowDataManagementModal,
     setCharacterManagerMode,
     clearMessages,
     expandChats,
@@ -34,6 +35,11 @@ function Navbar() {
   
   const handleDisplaySettings = () => {
     setShowDisplaySettingsModal(true);
+    setShowMenu(false);
+  };
+  
+  const handleDataManagement = () => {
+    setShowDataManagementModal(true);
     setShowMenu(false);
   };
   
@@ -130,6 +136,15 @@ function Navbar() {
             >
               <FiCode size={16} />
               Custom Prompts
+            </button>
+            <div className="h-px bg-[var(--grey-0)] my-1" />
+            <div className="px-4 py-1 text-xs text-[var(--grey-2)] uppercase tracking-wide">Data</div>
+            <button
+              onClick={handleDataManagement}
+              className="w-full px-4 py-2 text-left hover:bg-[var(--dark-2)] flex items-center gap-3"
+            >
+              <FiDatabase size={16} />
+              Data Management
             </button>
             <div className="h-px bg-[var(--grey-0)] my-1" />
             <div className="px-4 py-1 text-xs text-[var(--grey-2)] uppercase tracking-wide">Settings</div>

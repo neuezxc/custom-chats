@@ -9,6 +9,7 @@ import CharacterManager from "./components/CharacterManager";
 import CustomSystemPrompt from "./components/CustomSystemPrompt";
 import UserProfileModal from "./components/UserProfileModal";
 import DisplaySettingsModal from "./components/DisplaySettingsModal";
+import DataManagementModal from "./components/DataManagementModal";
 
 import { FiMaximize, FiMinimize } from "react-icons/fi";
 import useChatStore from "../stores/useChatStore";
@@ -56,6 +57,7 @@ export default function Home() {
       <CustomSystemPrompt />
       <UserProfileModal />
       <DisplaySettingsModal />
+      <DataManagementModal />
     </div>
   );
 }

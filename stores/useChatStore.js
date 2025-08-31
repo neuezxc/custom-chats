@@ -177,6 +177,7 @@ const useChatStore = create(
       showCustomSystemPrompt: false,
       showUserProfileModal: false,
       showDisplaySettingsModal: false,
+      showDataManagementModal: false,
 
       characterManagerMode: 'list', // 'list', 'edit', 'create'
       editingCharacterId: null,
@@ -283,6 +284,8 @@ const useChatStore = create(
       setShowUserProfileModal: (show) => set({ showUserProfileModal: show }),
 
       setShowDisplaySettingsModal: (show) => set({ showDisplaySettingsModal: show }),
+
+      setShowDataManagementModal: (show) => set({ showDataManagementModal: show }),
 
       // Display Settings Actions
       updateDisplaySettings: (updates) => set((state) => ({
@@ -875,6 +878,91 @@ const useChatStore = create(
           }
         }
       }),
+
+      // Data Export Function
+      exportAllData: () => {
+        const state = get()
+        // Create a clean export object without functions
+        const exportData = {
+          version: '1.0',
+          timestamp: new Date().toISOString(),
+          messages: state.messages,
+          conversations: state.conversations,
+          currentCharacter: state.currentCharacter,
+          currentUser: state.currentUser,
+          characters: state.characters,
+          apiSettings: state.apiSettings,
+          displaySettings: state.displaySettings,
+          customSystemPrompt: state.customSystemPrompt
+        }
+        return exportData
+      },
+
+      // Data Import Function
+      importAllData: (importData) => {
+        try {
+          // Validate import data
+          if (!importData || !importData.version) {
+            throw new Error('Invalid backup file')
+          }
+
+          // Update state with imported data
+          set({
+            messages: importData.messages || [],
+            conversations: importData.conversations || {},
+            currentCharacter: importData.currentCharacter || get().currentCharacter,
+            currentUser: importData.currentUser || get().currentUser,
+            characters: importData.characters || get().characters,
+            apiSettings: importData.apiSettings || get().apiSettings,
+            displaySettings: importData.displaySettings || get().displaySettings,
+            customSystemPrompt: importData.customSystemPrompt || get().customSystemPrompt
+          })
+
+          return { success: true }
+        } catch (error) {
+          console.error('Import failed:', error)
+          return { success: false, error: error.message }
+        }
+      },
+
+      // Data Clear Functions
+      clearAllData: () => {
+        set({
+          messages: [],
+          conversations: {},
+          characters: {},
+          apiSettings: {
+            provider: 'gemini',
+            geminiApiKey: '',
+            openrouterApiKey: '',
+            selectedModel: 'gemini-2.5-flash'
+          },
+          displaySettings: {
+            primaryColor: '#5373cc',
+            primaryLightColor: '#c0d1fc',
+            textSize: 'medium'
+          },
+          customSystemPrompt: {
+            enabled: false,
+            content: '',
+            useStructuredPrompting: false
+          }
+        })
+      },
+
+      clearConversations: () => {
+        set({
+          messages: [],
+          conversations: {}
+        })
+      },
+
+      clearCharacters: () => {
+        set({
+          characters: {},
+          currentCharacter: null
+        })
+      },
 
       // Message validation
       validateMessage: (text) => {
