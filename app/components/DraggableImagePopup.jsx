@@ -24,35 +24,43 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
   useEffect(() => {
     let timer;
     if (isOpen) {
-      // Delay opening by 1 second
-      timer = setTimeout(() => {
-        setIsVisible(true);
-        setIsAnimating(true);
-        setScale(0.3);
-        setOpacity(0);
-        setRotation(10);
-        // Add smooth bounce effect with spring physics
-        setTimeout(() => {
-          setScale(1.2);
-          setOpacity(1);
-          setRotation(-5);
-          setTimeout(() => {
-            setScale(1);
-            setRotation(0);
-            setTimeout(() => {
-              setIsAnimating(false);
-            }, 150);
-          }, 300);
-        }, 150);
-      }, 1000);
-    } else {
+      // Immediately show the popup with a quick bounce effect
+      setIsVisible(true);
       setIsAnimating(true);
-      setScale(0.8);
+      setScale(0.3);
       setOpacity(0);
       setRotation(10);
+      // Add smooth bounce effect with spring physics
+      setTimeout(() => {
+        setScale(1.1);
+        setOpacity(1);
+        setRotation(-5);
+        setTimeout(() => {
+          setScale(1);
+          setRotation(0);
+          setTimeout(() => {
+            setIsAnimating(false);
+          }, 100);
+        }, 150);
+      }, 50);
+    } else {
+      // Smooth exit animation - scale down and fade out
+      setIsAnimating(true);
+      setScale(1.05); // Slight zoom first
+      setOpacity(1); // Ensure it's fully visible
+      
+      // Then animate out smoothly
+      setTimeout(() => {
+        setScale(0.5);
+        setOpacity(0);
+        setRotation(5);
+      }, 30);
+      
+      // Hide after animation completes
       timer = setTimeout(() => {
         setIsVisible(false);
-      }, 500);
+        setIsAnimating(false);
+      }, 350);
     }
     return () => clearTimeout(timer);
   }, [isOpen]);
@@ -67,9 +75,13 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
       const defaultWidth = viewportWidth > 768 ? 300 : Math.min(300, viewportWidth - 40);
       const defaultHeight = viewportWidth > 768 ? 300 : Math.min(300, viewportHeight - 100);
       
+      // Position the popup near the click point if possible, otherwise center it
+      const centerX = (viewportWidth - defaultWidth) / 2;
+      const centerY = (viewportHeight - defaultHeight) / 2;
+      
       setPosition({
-        x: (viewportWidth - defaultWidth) / 2,
-        y: (viewportHeight - defaultHeight) / 2
+        x: centerX,
+        y: centerY
       });
       
       setSize({ width: defaultWidth, height: defaultHeight });
@@ -149,16 +161,15 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
   };
 
   const handleMouseUp = () => {
-    // Add bounce effect when releasing drag
+    // Add smooth bounce effect when releasing drag
     if (isDragging) {
       setIsAnimating(true);
       setScale(0.98);
       setTimeout(() => {
-        setScale(1.05);
+        setScale(1);
         setTimeout(() => {
-          setScale(1);
           setIsAnimating(false);
-        }, 150);
+        }, 100);
       }, 100);
     }
     setIsDragging(false);
@@ -243,16 +254,15 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
   };
 
   const handleTouchEnd = () => {
-    // Add bounce effect when releasing touch drag
+    // Add smooth bounce effect when releasing touch drag
     if (isDragging) {
       setIsAnimating(true);
       setScale(0.98);
       setTimeout(() => {
-        setScale(1.05);
+        setScale(1);
         setTimeout(() => {
-          setScale(1);
           setIsAnimating(false);
-        }, 150);
+        }, 100);
       }, 100);
     }
     setIsDragging(false);
@@ -283,7 +293,7 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
 
   const toggleMaximize = () => {
     if (isMaximized) {
-      // Restore previous state with bounce effect
+      // Restore previous state with smooth transition
       setIsAnimating(true);
       setScale(1.05);
       setTimeout(() => {
@@ -292,12 +302,14 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
         setScale(0.95);
         setTimeout(() => {
           setScale(1);
-          setIsAnimating(false);
-        }, 200);
-      }, 200);
+          setTimeout(() => {
+            setIsAnimating(false);
+          }, 100);
+        }, 150);
+      }, 150);
       setIsMaximized(false);
     } else {
-      // Save current state and maximize with bounce effect
+      // Save current state and maximize with smooth transition
       setPreviousState({
         position: { ...position },
         size: { ...size }
@@ -314,9 +326,11 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
         setScale(0.95);
         setTimeout(() => {
           setScale(1);
-          setIsAnimating(false);
-        }, 200);
-      }, 200);
+          setTimeout(() => {
+            setIsAnimating(false);
+          }, 100);
+        }, 150);
+      }, 150);
       setIsMaximized(true);
     }
   };
@@ -344,7 +358,7 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
           transform: `rotate(${rotation}deg) scale(${scale})`,
           transition: isDragging || isResizing 
             ? 'none' 
-            : 'transform 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55), opacity 0.3s ease',
+            : 'transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.1s ease-out',
           opacity: opacity,
           boxShadow: isDragging 
             ? '0 20px 40px rgba(0, 0, 0, 0.5)' 
@@ -359,7 +373,7 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
           onMouseDown={handleMouseDown}
           onTouchStart={handleTouchStart}
         >
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2 opacity-0">
             <div className="w-3 h-3 rounded-full bg-red-400"></div>
             <div className="w-3 h-3 rounded-full bg-yellow-400"></div>
             <div className="w-3 h-3 rounded-full bg-green-400"></div>
@@ -413,7 +427,7 @@ function DraggableImagePopup({ isOpen, onClose, imageSrc, altText }) {
               draggable={false}
               style={{
                 transform: `rotate(${-rotation}deg)`,
-                transition: 'transform 0.5s cubic-bezier(0.68, -0.55, 0.265, 1.55)'
+                transition: 'transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1)'
               }}
             />
             <div className="absolute inset-0 rounded-lg bg-gradient-to-t from-black/20 to-transparent pointer-events-none"></div>
