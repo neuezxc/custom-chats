@@ -1,5 +1,5 @@
 import { FiUser, FiEdit, FiTrash2 } from "react-icons/fi";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import useChatStore from "../../../stores/useChatStore";
 import EditableUserMessage from "../EditableUserMessage";
 import DeleteConfirmationModal from "../DeleteConfirmationModal";
@@ -13,7 +13,8 @@ function UserChat({ message, messageIndex, isLastUserMessage }) {
     cancelMessageEdit, 
     isTyping, 
     isRegenerating,
-    deleteUserMessage 
+    deleteUserMessage,
+    displaySettings
   } = useChatStore();
   const [editContent, setEditContent] = useState(message.content);
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
@@ -99,6 +100,10 @@ function UserChat({ message, messageIndex, isLastUserMessage }) {
       <div
         id="user-bubble"
         className="max-w-[80%] self-end  p-3 px-5 rounded-[var(--border-radius)] relative"
+        style={{
+          fontSize: displaySettings.textSize === 'small' ? '0.875rem' : 
+                   displaySettings.textSize === 'large' ? '1.125rem' : '1rem'
+        }}
       >
         {message.isEditing ? (
           <EditableUserMessage 

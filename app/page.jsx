@@ -8,17 +8,29 @@ import ApiSettingsModal from "./components/ApiSettingsModal";
 import CharacterManager from "./components/CharacterManager";
 import CustomSystemPrompt from "./components/CustomSystemPrompt";
 import UserProfileModal from "./components/UserProfileModal";
+import DisplaySettingsModal from "./components/DisplaySettingsModal";
 
 import { FiMaximize, FiMinimize } from "react-icons/fi";
 import useChatStore from "../stores/useChatStore";
 
 export default function Home() {
-  const { expandChats, setExpandChats, initializeConversations } = useChatStore();
+  const { expandChats, setExpandChats, initializeConversations, displaySettings } = useChatStore();
   
   // Initialize conversations when page loads
   useEffect(() => {
     initializeConversations();
   }, [initializeConversations]);
+  
+  // Apply display settings when they change
+  useEffect(() => {
+    // Apply the colors to CSS variables
+    document.documentElement.style.setProperty('--primary', displaySettings.primaryColor || '#5373cc');
+    document.documentElement.style.setProperty('--primary-light', displaySettings.primaryLightColor || '#c0d1fc');
+    
+    // Apply text size class to body
+    document.body.classList.remove('text-size-small', 'text-size-medium', 'text-size-large');
+    document.body.classList.add(`text-size-${displaySettings.textSize || 'medium'}`);
+  }, [displaySettings]);
   
   const handleExpand = () => {
     setExpandChats(!expandChats);
@@ -43,6 +55,7 @@ export default function Home() {
       <CharacterManager />
       <CustomSystemPrompt />
       <UserProfileModal />
+      <DisplaySettingsModal />
     </div>
   );
 }

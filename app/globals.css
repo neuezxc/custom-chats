@@ -24,8 +24,54 @@ body {
   width: 100vw;
   overflow: hidden;
 }
+
+/* Text Size Classes */
+body.text-size-small {
+  font-size: 14px;
+}
+
+body.text-size-medium {
+  font-size: 16px;
+}
+
+body.text-size-large {
+  font-size: 18px;
+}
+
+/* Chat bubble text sizing */
+.text-size-small #user-bubble,
+.text-size-small #character-bubble {
+  font-size: 14px;
+}
+
+.text-size-medium #user-bubble,
+.text-size-medium #character-bubble {
+  font-size: 16px;
+}
+
+.text-size-large #user-bubble,
+.text-size-large #character-bubble {
+  font-size: 18px;
+}
+
+/* Input area text sizing */
+.text-size-small #super-input textarea {
+  font-size: 14px;
+}
+
+.text-size-medium #super-input textarea {
+  font-size: 16px;
+}
+
+.text-size-large #super-input textarea {
+  font-size: 18px;
+}
+
 textarea {
   outline: none;
+}
+button {
+  cursor: pointer;
 }
 button {
   cursor: pointer;

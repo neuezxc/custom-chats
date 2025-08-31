@@ -155,6 +155,13 @@ const useChatStore = create(
         useStructuredPrompting: false
       },
 
+      // Display Settings
+      displaySettings: {
+        primaryColor: '#5373cc',
+        primaryLightColor: '#c0d1fc',
+        textSize: 'medium' // 'small', 'medium', 'large'
+      },
+
       // API Configuration
       apiSettings: {
         provider: 'gemini', // 'gemini' or 'openrouter'
@@ -169,6 +176,7 @@ const useChatStore = create(
       showCharacterManager: false,
       showCustomSystemPrompt: false,
       showUserProfileModal: false,
+      showDisplaySettingsModal: false,
 
       characterManagerMode: 'list', // 'list', 'edit', 'create'
       editingCharacterId: null,
@@ -273,6 +281,13 @@ const useChatStore = create(
       setShowCustomSystemPrompt: (show) => set({ showCustomSystemPrompt: show }),
 
       setShowUserProfileModal: (show) => set({ showUserProfileModal: show }),
+
+      setShowDisplaySettingsModal: (show) => set({ showDisplaySettingsModal: show }),
+
+      // Display Settings Actions
+      updateDisplaySettings: (updates) => set((state) => ({
+        displaySettings: { ...state.displaySettings, ...updates }
+      })),
 
       // Custom System Prompt Actions
       updateCustomSystemPrompt: (settings) => {
@@ -1823,7 +1838,8 @@ const useChatStore = create(
         characters: state.characters,
         globalLorebook: state.globalLorebook,
         userName: state.userName,
-        customSystemPrompt: state.customSystemPrompt
+        customSystemPrompt: state.customSystemPrompt,
+        displaySettings: state.displaySettings
       })
     }
   )

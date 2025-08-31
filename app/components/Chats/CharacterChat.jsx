@@ -14,7 +14,8 @@ function CharacterChat({ message, character, isLatest = false, isRegenerating: i
     isTyping,
     isRegenerating,
     updateLastLLMResponse,
-    setCharacterEmotion
+    setCharacterEmotion,
+    displaySettings
   } = useChatStore();
   
   const [showImagePopup, setShowImagePopup] = useState(false);
@@ -162,6 +163,10 @@ function CharacterChat({ message, character, isLatest = false, isRegenerating: i
                   className={`prose prose-xs sm:prose-sm max-w-none ${
                     message.isError ? 'text-red-400' : 'text-white'
                   }`}
+                  style={{
+                    fontSize: displaySettings.textSize === 'small' ? '0.875rem' : 
+                             displaySettings.textSize === 'large' ? '1.125rem' : '1rem'
+                  }}
                 >
                   <div
                     dangerouslySetInnerHTML={{

@@ -9,6 +9,7 @@ function Navbar() {
     setShowCharacterManager,
     setShowCustomSystemPrompt,
     setShowUserProfileModal,
+    setShowDisplaySettingsModal,
     setCharacterManagerMode,
     clearMessages,
     expandChats,
@@ -28,6 +29,11 @@ function Navbar() {
   
   const handleApiSettings = () => {
     setShowApiSettingsModal(true);
+    setShowMenu(false);
+  };
+  
+  const handleDisplaySettings = () => {
+    setShowDisplaySettingsModal(true);
     setShowMenu(false);
   };
   
@@ -108,6 +114,13 @@ function Navbar() {
             </button>
             <div className="h-px bg-[var(--grey-0)] my-1" />
             <div className="px-4 py-1 text-xs text-[var(--grey-2)] uppercase tracking-wide">Customization</div>
+            <button
+              onClick={handleDisplaySettings}
+              className="w-full px-4 py-2 text-left hover:bg-[var(--dark-2)] flex items-center gap-3"
+            >
+              <FiSettings size={16} />
+              Display Settings
+            </button>
             <button
               onClick={() => {
                 setShowCustomSystemPrompt(true)

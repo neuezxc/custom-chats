@@ -11,7 +11,8 @@ function SuperInput() {
     setShowApiSettingsModal,
     setShowCustomSystemPrompt,
     currentCharacter,
-    customSystemPrompt
+    customSystemPrompt,
+    displaySettings
   } = useChatStore();
 
   const [message, setMessage] = useState("");
@@ -66,6 +67,10 @@ function SuperInput() {
         disabled={isTyping}
         className="flex-1 p-4 resize-none min-h-[60px] max-h-[100px] overflow-y-auto bg-transparent outline-none disabled:opacity-50"
         placeholder={hasApiKey ? "Enter to send chat (type / for shortcuts)" : "Configure API key in settings to start chatting"}
+        style={{
+          fontSize: displaySettings.textSize === 'small' ? '14px' : 
+                   displaySettings.textSize === 'large' ? '18px' : '16px'
+        }}
       />
 
       <div className="">
