@@ -97,13 +97,13 @@ function CharacterChat({ message, character, isLatest = false, isRegenerating: i
     // Process line breaks first
     processedText = processedText.replace(/\n/g, '<br/>');
     
-    // Process double asterisks (**text**) - italic with 40% opacity
-    processedText = processedText.replace(/\*\*((?:[^*]|\*(?!\*))+?)\*\*/g, 
+    // Process single asterisks (*text*) - italic with 40% opacity
+    processedText = processedText.replace(/\*([^*]+?)\*/g, 
       '<em>$1</em>');
     
     // Process quoted text ("text") - primary light color, normal opacity
     processedText = processedText.replace(/"([^"\n]*?)"/g, 
-      '<span class="quoted-text">"$1"</span>');
+      '<span class="quoted-text">$1</span>');
     
     return processedText;
   };
