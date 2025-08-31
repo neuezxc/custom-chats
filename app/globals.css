@@ -106,28 +106,28 @@ button {
   animation: bounce 1.4s infinite ease-in-out both;
 }
 
-/* Custom scrollbar */
+/* Style the entire scrollbar */
 ::-webkit-scrollbar {
-  width: 100px;
+  width: 5px; /* Adjust width for vertical scrollbar */
+  height: 5px; /* Adjust height for horizontal scrollbar */
 }
 
-::-webkit-scrollbar {
-  height: 2px; /* Sets the height (and thus "height" for horizontal scrollbars) */
-}
-
+/* Style the scrollbar track */
 ::-webkit-scrollbar-track {
-  background: var(--dark-1);
+  background: var(--dark-0);
+  border-radius: 5px;
 }
 
+/* Style the scrollbar thumb */
 ::-webkit-scrollbar-thumb {
-  background: var(--grey-0);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
   background: var(--grey-1);
+  border-radius: 5px;
 }
 
+/* Style the scrollbar thumb on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
 /* Prose styles for markdown */
 .prose {
   color: inherit;
