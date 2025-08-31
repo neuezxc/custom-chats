@@ -201,10 +201,16 @@ const useChatStore = create(
 
         // Ensure current character has a welcome message if no messages exist
         if (state.messages.length === 0 && character.firstMessage) {
+          // Process placeholders in first message
+          let processedFirstMessage = character.firstMessage
+            .replace(/\{\{char\}\}/g, character.name)
+            .replace(/\{\{user\}\}/g, state.currentUser.name || 'User')
+            .replace(/\{\{user_description\}\}/g, state.currentUser.description || 'A curious person exploring conversations with AI characters.');
+          
           const welcomeMessage = {
             id: `${character.id}_welcome`,
             type: 'character',
-            content: character.firstMessage,
+            content: processedFirstMessage,
             sender: character.name
           }
           updatedConversations[character.id] = [welcomeMessage]
@@ -231,10 +237,16 @@ const useChatStore = create(
 
         // If the character has a welcome message, add it to the cleared conversation
         if (character && character.firstMessage) {
+          // Process placeholders in first message
+          let processedFirstMessage = character.firstMessage
+            .replace(/\{\{char\}\}/g, character.name)
+            .replace(/\{\{user\}\}/g, state.currentUser.name || 'User')
+            .replace(/\{\{user_description\}\}/g, state.currentUser.description || 'A curious person exploring conversations with AI characters.');
+          
           newMessages = [{
             id: `${character.id}_welcome`,
             type: 'character',
-            content: character.firstMessage,
+            content: processedFirstMessage,
             sender: character.name
           }]
         }
@@ -291,16 +303,22 @@ const useChatStore = create(
         let newMessages = updatedConversations[characterId] || []
 
         // If no messages exist for this character, add their welcome message
-        if (newMessages.length === 0 && character.firstMessage) {
-          newMessages = [{
-            id: `${characterId}_welcome`,
-            type: 'character',
-            content: character.firstMessage,
-            sender: character.name
-          }]
-          // Update the conversations to include this welcome message
-          updatedConversations[characterId] = newMessages
-        }
+      if (newMessages.length === 0 && character.firstMessage) {
+        // Process placeholders in first message
+        let processedFirstMessage = character.firstMessage
+          .replace(/\{\{char\}\}/g, character.name)
+          .replace(/\{\{user\}\}/g, state.currentUser.name || 'User')
+          .replace(/\{\{user_description\}\}/g, state.currentUser.description || 'A curious person exploring conversations with AI characters.');
+        
+        newMessages = [{
+          id: `${characterId}_welcome`,
+          type: 'character',
+          content: processedFirstMessage,
+          sender: character.name
+        }]
+        // Update the conversations to include this welcome message
+        updatedConversations[characterId] = newMessages
+      }
 
         return {
           currentCharacter: character,
@@ -2087,7 +2105,30 @@ async function callGeminiAPI(userMessage, character, apiSettings, conversationCo
     }
 
     const data = await response.json()
-    return data.candidates[0].content.parts[0].text
+    
+    // Enhanced error handling for Gemini API responses
+    if (!data.candidates || data.candidates.length === 0) {
+      // Check for safety/blocking reasons
+      if (data.promptFeedback) {
+        throw new Error(`Gemini API blocked the response: ${JSON.stringify(data.promptFeedback)}`)
+      }
+      
+      // Check for error details
+      if (data.error) {
+        throw new Error(`Gemini API error: ${data.error.message || JSON.stringify(data.error)}`)
+      }
+      
+      // Generic error for unexpected response structure
+      throw new Error(`Gemini API returned unexpected response structure: ${JSON.stringify(data)}`)
+    }
+    
+    // Validate candidate structure before accessing
+    const candidate = data.candidates[0]
+    if (!candidate.content || !candidate.content.parts || candidate.content.parts.length === 0) {
+      throw new Error(`Gemini API returned empty content: ${JSON.stringify(candidate)}`)
+    }
+    
+    return candidate.content.parts[0].text
   }
 }
 

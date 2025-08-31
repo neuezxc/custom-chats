@@ -81,7 +81,7 @@ function SuperInput() {
             <button
               onClick={() => setShowCustomSystemPrompt(true)}
               className={`flex items-center gap-1 px-2 h-[30px] rounded text-xs transition-colors ${customSystemPrompt.enabled
-                ? 'bg-[var(--primary)] text-white'
+                ? 'bg-[var(--dark-1)] border border-[var(--grey-0)] text-white'
                 : 'bg-[var(--dark-2)] border border-[var(--grey-0)] text-[var(--grey-1)] hover:text-white hover:border-[var(--grey-1)]'
                 }`}
               title={customSystemPrompt.enabled ? 'Custom prompt active - click to edit' : 'Set custom system prompt'}

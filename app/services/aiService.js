@@ -1,11 +1,6 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Import buildSystemPrompt function from store
-function buildSystemPrompt(character, triggeredLore = [], customSettings = null) {
-  // We need to access the store state, but we can't import useChatStore directly here
-  // due to circular dependencies, so we'll reconstruct the logic
-  
-  const currentUser = { name: 'User', description: 'A curious person exploring conversations with AI characters.' };
+// Import buildSystemPrompt function from store\nfunction buildSystemPrompt(character, triggeredLore = [], customSettings = null) {\n  // We need to access the store state, but we can't import useChatStore directly here\n  // due to circular dependencies, so we'll reconstruct the logic\n  \n  const currentUser = { name: 'User', description: 'A curious person exploring conversations with AI characters.' };\n  \n  // Helper function to format triggered lore entries for {{lore}} placeholder\n  function formatTriggeredLore(triggeredLore, character, currentUser) {\n    if (!triggeredLore || triggeredLore.length === 0) {\n      return '';\n    }\n\n    const processedEntries = triggeredLore.map(entry => {\n      let description = entry.description || '';\n\n      // Replace placeholders in each lore entry\n      description = description.replace(/\\{\\{char\\}\\}/g, character.name || 'Character');\n      description = description.replace(/\\{\\{char_description\\}\\}/g, character.description || 'Character description');\n      description = description.replace(/\\{\\{user\\}\\}/g, currentUser.name || 'User');\n      description = description.replace(/\\{\\{user_description\\}\\}/g, currentUser.description || 'A curious person exploring conversations with AI characters.');\n\n      return `${entry.name}: ${description}`;\n    });\n\n    return processedEntries.join('\\n');\n  }
   
   // Use custom system prompt if enabled
   if (customSettings?.enabled && customSettings?.content) {
@@ -15,6 +10,10 @@ function buildSystemPrompt(character, triggeredLore = [], customSettings = null)
     customPrompt = customPrompt.replace(/\{\{char_description\}\}/g, character.description);
     customPrompt = customPrompt.replace(/\{\{user\}\}/g, currentUser.name || 'User');
     customPrompt = customPrompt.replace(/\{\{user_description\}\}/g, currentUser.description || 'A curious person exploring conversations with AI characters.');
+    
+    // Process {{lore}} placeholder with formatted triggered lore
+    const loreContent = formatTriggeredLore(triggeredLore, character, currentUser);
+    customPrompt = customPrompt.replace(/\{\{lore\}\}/g, loreContent);
     
     // Process {{emotions}} placeholder with emotion instructions
     let emotionContent = '';
@@ -68,6 +67,20 @@ function buildSystemPrompt(character, triggeredLore = [], customSettings = null)
   // Add example dialogue if available
   if (character.exampleDialogue) {
     systemPrompt += `\n\nExample dialogue: ${character.exampleDialogue}`;
+  }
+  
+  // Add triggered lorebook entries
+  if (triggeredLore.length > 0) {
+    systemPrompt += '\n\nRelevant Context:';
+    triggeredLore.forEach(entry => {
+      let description = entry.description;
+      // Replace placeholders
+      description = description.replace(/\{\{char\}\}/g, character.name);
+      description = description.replace(/\{\{char_description\}\}/g, character.description);
+      description = description.replace(/\{\{user\}\}/g, currentUser.name || 'User');
+      description = description.replace(/\{\{user_description\}\}/g, currentUser.description || 'A curious person exploring conversations with AI characters.');
+      systemPrompt += `\n- ${entry.name}: ${description}`;
+    });
   }
   
   // Add emotion instructions if character uses emotion mode
@@ -233,7 +246,30 @@ class AIService {
     }
 
     const data = await response.json();
-    return data.choices[0].message.content;
+    
+    // Enhanced error handling for Gemini API responses
+    if (!data.candidates || data.candidates.length === 0) {
+      // Check for safety/blocking reasons
+      if (data.promptFeedback) {
+        throw new Error(`Gemini API blocked the response: ${JSON.stringify(data.promptFeedback)}`);
+      }
+      
+      // Check for error details
+      if (data.error) {
+        throw new Error(`Gemini API error: ${data.error.message || JSON.stringify(data.error)}`);
+      }
+      
+      // Generic error for unexpected response structure
+      throw new Error(`Gemini API returned unexpected response structure: ${JSON.stringify(data)}`);
+    }
+    
+    // Validate candidate structure before accessing
+    const candidate = data.candidates[0];
+    if (!candidate.content || !candidate.content.parts || candidate.content.parts.length === 0) {
+      throw new Error(`Gemini API returned empty content: ${JSON.stringify(candidate)}`);
+    }
+    
+    return candidate.content.parts[0].text;
   }
 }
 
