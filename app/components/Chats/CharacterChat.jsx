@@ -113,14 +113,14 @@ function CharacterChat({ message, character, isLatest = false, isRegenerating: i
     <div id="character-chat" className="flex flex-row gap-3 animate-fade-in group">
       <div
         id="character-icon"
-        className="h-[50px] w-[50px] rounded-[var(--border-radius)] bg-[var(--grey-0)] flex-shrink-0 flex items-center justify-center overflow-hidden cursor-pointer hover:opacity-90 transition-opacity"
+        className="h-[50px] w-[50px] rounded-[var(--border-radius)] bg-[var(--grey-0)] flex-shrink-0 flex items-center justify-center overflow-hidden cursor-pointer hover:opacity-90 transition-opacity relative"
         onClick={() => character.avatar && setShowImagePopup(true)}
       >
         {character.avatar ? (
           <img
             src={character.avatar}
             alt={character.name}
-            className="object-fill"
+            className="absolute inset-0 h-full w-full object-cover"
           />
         ) : (
           <div className="w-full h-full bg-gradient-to-br from-[var(--primary)] to-[var(--primary)]/70 rounded-[var(--border-radius)] flex items-center justify-center text-white font-semibold text-lg">
