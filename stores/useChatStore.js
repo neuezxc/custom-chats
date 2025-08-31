@@ -4,27 +4,7 @@ import { persist } from 'zustand/middleware'
 const useChatStore = create(
   persist(
     (set, get) => ({
-      // Chat State - Per-Character Conversations
-      conversations: {
-        'hayeon': [{
-          id: 'hayeon_welcome',
-          type: 'character',
-          content: 'Hello! I\'m Hayeon, your friendly AI assistant. How can I help you today?',
-          sender: 'Hayeon'
-        }],
-        'aria': [{
-          id: 'aria_welcome',
-          type: 'character',
-          content: '*The air shimmers with arcane energy as you approach the towering spire. A figure in flowing robes appears before you, her eyes gleaming with otherworldly knowledge.* Welcome, traveler, to my domain. I am Aria. Few mortals find their way here by chance...',
-          sender: 'Aria'
-        }],
-        'alex': [{
-          id: 'alex_welcome',
-          type: 'character',
-          content: 'Hey there! I\'m Alex, your coding companion. Whether you\'re debugging, learning new technologies, or architecting solutions, I\'m here to help. What are you working on today?',
-          sender: 'Alex'
-        }]
-      },
+      // Chat State - Per-Character Conversations\n      conversations: {\n        'hayeon': [{\n          id: 'hayeon_welcome',\n          type: 'character',\n          content: 'Hello! I\\'m Hayeon, your friendly AI assistant. How can I help you today?',\n          sender: 'Hayeon'\n        }]\n      },
       messages: [{
         id: 'hayeon_welcome',
         type: 'character',
@@ -73,78 +53,6 @@ const useChatStore = create(
             images: [],
             activeImageIndex: 0
           }
-        },
-        'aria': {
-          id: 'aria',
-          name: 'Aria',
-          description: 'A mysterious and powerful sorceress from the enchanted realm of Ethereal. You possess ancient knowledge of magic and speak with wisdom beyond your years. You reside in your magical tower, surrounded by ancient tomes and mystical artifacts, where few mortals find their way by chance.',
-          avatar: null,
-          firstMessage: '*The air shimmers with arcane energy as you approach the towering spire. A figure in flowing robes appears before you, her eyes gleaming with otherworldly knowledge.* Welcome, traveler, to my domain. I am Aria. Few mortals find their way here by chance...',
-          exampleDialogue: 'User: What kind of magic do you practice?\nAria: *gestures gracefully, causing ethereal lights to dance around her fingers* I weave the very fabric of reality itself, dear one. Illusion and transmutation are my favored arts, though I have studied all schools of magic across the centuries.',
-          imageGallery: {
-            mode: 'default',
-            images: [],
-            activeImageIndex: 0
-          },
-          lorebook: [
-            {
-              id: 'ethereal-realm',
-              name: 'Ethereal Realm',
-              triggers: ['ethereal', 'realm', 'tower', 'domain', 'magical realm'],
-              description: 'The Ethereal is a mystical dimension where magic flows freely through the air. Time moves differently here, and the landscape shifts according to the will of powerful mages. Aria\'s tower stands at the heart of this realm, a beacon of ancient knowledge.',
-              isActive: true
-            },
-            {
-              id: 'arias-tower',
-              name: 'Aria\'s Tower',
-              triggers: ['tower', 'spire', 'library', 'study', 'sanctuary'],
-              description: 'A magnificent crystalline tower that pierces the clouds of the Ethereal realm. Each floor contains different magical artifacts, ancient tomes, and mystical experiments. The top floor serves as {{char}}\'s personal study and scrying chamber.',
-              isActive: true
-            },
-            {
-              id: 'arcane-knowledge',
-              name: 'Arcane Knowledge',
-              triggers: ['magic', 'spell', 'arcane', 'knowledge', 'tome', 'ancient'],
-              description: '{{char}} has spent centuries accumulating magical knowledge from across multiple dimensions. She possesses spells of incredible power and knows the secret histories of many realms. Her wisdom comes at a price - she never shares knowledge freely.',
-              isActive: true
-            }
-          ]
-        },
-        'alex': {
-          id: 'alex',
-          name: 'Alex',
-          description: 'A passionate software engineer and coding mentor. Alex loves helping developers solve problems, learn new technologies, and write better code. With expertise across multiple programming languages and frameworks, Alex can assist with everything from debugging to architecture design.',
-          avatar: null,
-          firstMessage: 'Hey there! I\'m Alex, your coding companion. Whether you\'re debugging, learning new technologies, or architecting solutions, I\'m here to help. What are you working on today?',
-          exampleDialogue: 'User: I\'m having trouble with React hooks\nAlex: I\'d be happy to help! React hooks can be tricky at first. What specific issue are you running into? Are you getting an error message, or is the behavior not what you expected?',
-          imageGallery: {
-            mode: 'default',
-            images: [],
-            activeImageIndex: 0
-          },
-          lorebook: [
-            {
-              id: 'programming-languages',
-              name: 'Programming Languages',
-              triggers: ['javascript', 'python', 'java', 'react', 'node', 'typescript', 'programming', 'code'],
-              description: '{{char}} has extensive experience with modern programming languages including JavaScript, TypeScript, Python, Java, Go, and Rust. Specializes in web development frameworks like React, Next.js, Vue, and backend technologies like Node.js and Express.',
-              isActive: true
-            },
-            {
-              id: 'debugging-expertise',
-              name: 'Debugging Expertise',
-              triggers: ['bug', 'error', 'debug', 'troubleshoot', 'fix', 'problem', 'issue'],
-              description: '{{char}} excels at systematic debugging approaches. Uses console.log strategically, understands common error patterns, and can help trace through code execution to identify root causes.',
-              isActive: true
-            },
-            {
-              id: 'best-practices',
-              name: 'Best Practices',
-              triggers: ['best practice', 'clean code', 'architecture', 'design pattern', 'optimization', 'performance'],
-              description: '{{char}} advocates for clean, maintainable code following SOLID principles, proper testing strategies, and modern development practices. Emphasizes readability, scalability, and team collaboration.',
-              isActive: true
-            }
-          ]
         }
       },
 
@@ -927,10 +835,41 @@ const useChatStore = create(
 
       // Data Clear Functions
       clearAllData: () => {
+        // Preserve Hayeon as the default character
+        const hayeonCharacter = {
+          id: 'hayeon',
+          name: 'Hayeon',
+          description: 'A friendly AI assistant ready to chat with you. You help users with various topics in a casual conversation setting.',
+          avatar: null,
+          firstMessage: 'Hello! I\'m Hayeon, your friendly AI assistant. How can I help you today?',
+          exampleDialogue: '',
+          lorebook: [],
+          imageGallery: {
+            mode: 'default',
+            images: [],
+            activeImageIndex: 0
+          }
+        };
+        
         set({
-          messages: [],
-          conversations: {},
-          characters: {},
+          messages: [{
+            id: 'hayeon_welcome',
+            type: 'character',
+            content: 'Hello! I\'m Hayeon, your friendly AI assistant. How can I help you today?',
+            sender: 'Hayeon'
+          }],
+          conversations: {
+            'hayeon': [{
+              id: 'hayeon_welcome',
+              type: 'character',
+              content: 'Hello! I\'m Hayeon, your friendly AI assistant. How can I help you today?',
+              sender: 'Hayeon'
+            }]
+          },
+          characters: {
+            'hayeon': hayeonCharacter
+          },
+          currentCharacter: hayeonCharacter,
           apiSettings: {
             provider: 'gemini',
             geminiApiKey: '',
@@ -951,16 +890,49 @@ const useChatStore = create(
       },
 
       clearConversations: () => {
+        const { currentCharacter } = get();
+        let newMessages = [];
+
+        // If the character has a welcome message, add it to the cleared conversation
+        if (currentCharacter && currentCharacter.firstMessage) {
+          newMessages = [{
+            id: `${currentCharacter.id}_welcome`,
+            type: 'character',
+            content: currentCharacter.firstMessage,
+            sender: currentCharacter.name
+          }];
+        }
+
         set({
-          messages: [],
-          conversations: {}
+          messages: newMessages,
+          conversations: {
+            [currentCharacter.id]: newMessages
+          }
         })
       },
 
       clearCharacters: () => {
+        // Preserve Hayeon as the default character
+        const hayeonCharacter = {
+          id: 'hayeon',
+          name: 'Hayeon',
+          description: 'A friendly AI assistant ready to chat with you. You help users with various topics in a casual conversation setting.',
+          avatar: null,
+          firstMessage: 'Hello! I\'m Hayeon, your friendly AI assistant. How can I help you today?',
+          exampleDialogue: '',
+          lorebook: [],
+          imageGallery: {
+            mode: 'default',
+            images: [],
+            activeImageIndex: 0
+          }
+        };
+        
         set({
-          characters: {},
-          currentCharacter: null
+          characters: {
+            'hayeon': hayeonCharacter
+          },
+          currentCharacter: hayeonCharacter
         })
       },
 

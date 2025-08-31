@@ -611,7 +611,7 @@ function CharacterManager() {
                       value={editForm.name}
                       onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
                       className="w-full p-3 bg-[var(--dark-1)] border border-[var(--grey-0)] rounded-lg text-white placeholder-[var(--grey-2)] focus:border-[var(--primary)] outline-none transition-colors"
-                      placeholder="Enter character name (e.g., Aria, Alex, Hayeon)"
+                      placeholder="Enter character name (e.g., Hayeon)"
                       autoFocus={characterManagerMode === 'create'}
                     />
                   </div>
