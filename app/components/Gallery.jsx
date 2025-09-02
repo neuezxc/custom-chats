@@ -51,21 +51,21 @@ function Gallery() {
       setCurrentEmotion(currentCharacterEmotion);
       
       const availableEmotions = getAvailableEmotions(imageGallery.images);
-      console.log('😀 Available emotions:', availableEmotions);
+ 
       
       let targetEmotion = currentCharacterEmotion;
       
       // Check if the detected emotion has a corresponding image
       if (!availableEmotions.includes(currentCharacterEmotion)) {
-        console.log('❌ Emotion not found, using fallback');
+ 
         // Fallback to best available emotion
         targetEmotion = getFallbackEmotion(availableEmotions) || 'neutral';
       }
       
-      console.log('🎯 Target emotion:', targetEmotion);
+ 
       
       const newEmotionImage = mapEmotionToImage(targetEmotion, imageGallery.images);
-      console.log('🖼️ New emotion image:', newEmotionImage);
+ 
       
       if (newEmotionImage) {
         setEmotionImage(newEmotionImage);

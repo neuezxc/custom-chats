@@ -20,8 +20,18 @@ function ApiSettingsModal() {
       url: apiSettings.proxy?.url || '',
       apiKey: apiSettings.proxy?.apiKey || ''
     },
-    selectedModel: apiSettings.selectedModel || 'gemini-2.5-flash'
+    selectedModel: apiSettings.selectedModel || 'gemini-2.5-flash',
+    // Advanced settings
+    temperature: apiSettings.temperature || 0.7,
+    maxTokens: apiSettings.maxTokens || 1000,
+    contextSize: apiSettings.contextSize || 10,
+    repetitionPenalty: apiSettings.repetitionPenalty || 1.0,
+    frequencyPenalty: apiSettings.frequencyPenalty || 0.0,
+    presencePenalty: apiSettings.presencePenalty || 0.0,
+    topP: apiSettings.topP || 0.95
   })
+  
+  const [activeTab, setActiveTab] = useState('connection') // 'connection' or 'advanced'
   const [testingConnection, setTestingConnection] = useState(false)
   const [connectionStatus, setConnectionStatus] = useState(null)
   
@@ -35,7 +45,15 @@ function ApiSettingsModal() {
         url: apiSettings.proxy?.url || '',
         apiKey: apiSettings.proxy?.apiKey || ''
       },
-      selectedModel: apiSettings.selectedModel || 'gemini-2.5-flash'
+      selectedModel: apiSettings.selectedModel || 'gemini-2.5-flash',
+      // Advanced settings
+      temperature: apiSettings.temperature || 0.7,
+      maxTokens: apiSettings.maxTokens || 1000,
+      contextSize: apiSettings.contextSize || 10,
+      repetitionPenalty: apiSettings.repetitionPenalty || 1.0,
+      frequencyPenalty: apiSettings.frequencyPenalty || 0.0,
+      presencePenalty: apiSettings.presencePenalty || 0.0,
+      topP: apiSettings.topP || 0.95
     })
   }, [apiSettings])
   
@@ -47,7 +65,25 @@ function ApiSettingsModal() {
   }
   
   const handleCancel = () => {
-    setLocalSettings(apiSettings)
+    setLocalSettings({
+      provider: apiSettings.provider || 'gemini',
+      geminiApiKey: apiSettings.geminiApiKey || '',
+      openrouterApiKey: apiSettings.openrouterApiKey || '',
+      proxy: {
+        name: apiSettings.proxy?.name || '',
+        url: apiSettings.proxy?.url || '',
+        apiKey: apiSettings.proxy?.apiKey || ''
+      },
+      selectedModel: apiSettings.selectedModel || 'gemini-2.5-flash',
+      // Advanced settings
+      temperature: apiSettings.temperature || 0.7,
+      maxTokens: apiSettings.maxTokens || 1000,
+      contextSize: apiSettings.contextSize || 10,
+      repetitionPenalty: apiSettings.repetitionPenalty || 1.0,
+      frequencyPenalty: apiSettings.frequencyPenalty || 0.0,
+      presencePenalty: apiSettings.presencePenalty || 0.0,
+      topP: apiSettings.topP || 0.95
+    })
     setShowApiSettingsModal(false)
   }
   
@@ -158,168 +194,358 @@ function ApiSettingsModal() {
             </button>
           </div>
           
-          {/* Provider Selection */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium mb-2">API Provider</label>
-            <div className="flex gap-3">
-              <button
-                onClick={() => setLocalSettings({ ...localSettings, provider: 'gemini' })}
-                className={`px-4 py-2 rounded border ${
-                  localSettings.provider === 'gemini'
-                    ? 'bg-[var(--primary)] border-[var(--primary)]'
-                    : 'border-[var(--grey-0)] hover:border-[var(--grey-1)]'
-                }`}
-              >
-                Gemini
-              </button>
-              <button
-                onClick={() => setLocalSettings({ ...localSettings, provider: 'openrouter' })}
-                className={`px-4 py-2 rounded border ${
-                  localSettings.provider === 'openrouter'
-                    ? 'bg-[var(--primary)] border-[var(--primary)]'
-                    : 'border-[var(--grey-0)] hover:border-[var(--grey-1)]'
-                }`}
-              >
-                OpenRouter
-              </button>
-              <button
-                onClick={() => setLocalSettings({ ...localSettings, provider: 'proxy' })}
-                className={`px-4 py-2 rounded border ${
-                  localSettings.provider === 'proxy'
-                    ? 'bg-[var(--primary)] border-[var(--primary)]'
-                    : 'border-[var(--grey-0)] hover:border-[var(--grey-1)]'
-                }`}
-              >
-                Proxy
-              </button>
-            </div>
+          {/* Tabs */}
+          <div className="flex border-b border-[var(--grey-0)] mb-6">
+            <button
+              onClick={() => setActiveTab('connection')}
+              className={`px-4 py-2 font-medium ${
+                activeTab === 'connection'
+                  ? 'text-[var(--primary)] border-b-2 border-[var(--primary)]'
+                  : 'text-[var(--grey-1)] hover:text-white'
+              }`}
+            >
+              Connection
+            </button>
+            <button
+              onClick={() => setActiveTab('parameters')}
+              className={`px-4 py-2 font-medium ${
+                activeTab === 'parameters'
+                  ? 'text-[var(--primary)] border-b-2 border-[var(--primary)]'
+                  : 'text-[var(--grey-1)] hover:text-white'
+              }`}
+            >
+              Parameters
+            </button>
           </div>
           
-          {/* API Key Input */}
-          <div className="mb-6">
-            {localSettings.provider === 'proxy' ? (
-              <>
-                <label className="block text-sm font-medium mb-2">Proxy Name</label>
-                <input
-                  type="text"
-                  value={localSettings.proxy.name}
-                  onChange={(e) => setLocalSettings({ 
-                    ...localSettings, 
-                    proxy: { ...localSettings.proxy, name: e.target.value }
-                  })}
-                  placeholder="Enter a name for this proxy"
-                  className="w-full p-3 bg-[var(--dark-2)] border border-[var(--grey-0)] rounded focus:border-[var(--primary)] outline-none mb-4"
-                />
+          {/* Connection Tab */}
+          {activeTab === 'connection' && (
+            <>
+              {/* Provider Selection */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium mb-2">API Provider</label>
+                <div className="flex gap-3">
+                  <button
+                    onClick={() => setLocalSettings({ ...localSettings, provider: 'gemini' })}
+                    className={`px-4 py-2 rounded border ${
+                      localSettings.provider === 'gemini'
+                        ? 'bg-[var(--primary)] border-[var(--primary)]'
+                        : 'border-[var(--grey-0)] hover:border-[var(--grey-1)]'
+                    }`}
+                  >
+                    Gemini
+                  </button>
+                  <button
+                    onClick={() => setLocalSettings({ ...localSettings, provider: 'openrouter' })}
+                    className={`px-4 py-2 rounded border ${
+                      localSettings.provider === 'openrouter'
+                        ? 'bg-[var(--primary)] border-[var(--primary)]'
+                        : 'border-[var(--grey-0)] hover:border-[var(--grey-1)]'
+                    }`}
+                  >
+                    OpenRouter
+                  </button>
+                  <button
+                    onClick={() => setLocalSettings({ ...localSettings, provider: 'proxy' })}
+                    className={`px-4 py-2 rounded border ${
+                      localSettings.provider === 'proxy'
+                        ? 'bg-[var(--primary)] border-[var(--primary)]'
+                        : 'border-[var(--grey-0)] hover:border-[var(--grey-1)]'
+                    }`}
+                  >
+                    Proxy
+                  </button>
+                </div>
+              </div>
+              
+              {/* API Key Input */}
+              <div className="mb-6">
+                {localSettings.provider === 'proxy' ? (
+                  <>
+                    <label className="block text-sm font-medium mb-2">Proxy Name</label>
+                    <input
+                      type="text"
+                      value={localSettings.proxy.name}
+                      onChange={(e) => setLocalSettings({ 
+                        ...localSettings, 
+                        proxy: { ...localSettings.proxy, name: e.target.value }
+                      })}
+                      placeholder="Enter a name for this proxy"
+                      className="w-full p-3 bg-[var(--dark-2)] border border-[var(--grey-0)] rounded focus:border-[var(--primary)] outline-none mb-4"
+                    />
+                    
+                    <label className="block text-sm font-medium mb-2">Proxy URL</label>
+                    <input
+                      type="text"
+                      value={localSettings.proxy.url}
+                      onChange={(e) => setLocalSettings({ 
+                        ...localSettings, 
+                        proxy: { ...localSettings.proxy, url: e.target.value }
+                      })}
+                      placeholder="Enter the proxy URL (e.g., https://your-colab-proxy.com)"
+                      className="w-full p-3 bg-[var(--dark-2)] border border-[var(--grey-0)] rounded focus:border-[var(--primary)] outline-none mb-4"
+                    />
+                    
+                    <label className="block text-sm font-medium mb-2">Proxy API Key (Optional)</label>
+                    <input
+                      type="password"
+                      value={localSettings.proxy.apiKey}
+                      onChange={(e) => setLocalSettings({ 
+                        ...localSettings, 
+                        proxy: { ...localSettings.proxy, apiKey: e.target.value }
+                      })}
+                      placeholder="Enter API key if required by your proxy"
+                      className="w-full p-3 bg-[var(--dark-2)] border border-[var(--grey-0)] rounded focus:border-[var(--primary)] outline-none"
+                    />
+                  </>
+                ) : (
+                  <>
+                    <label className="block text-sm font-medium mb-2">
+                      {localSettings.provider === 'gemini' ? 'Gemini API Key' : 'OpenRouter API Key'}
+                    </label>
+                    <input
+                      type="password"
+                      value={localSettings.provider === 'gemini' ? localSettings.geminiApiKey : localSettings.openrouterApiKey}
+                      onChange={(e) => {
+                        const key = localSettings.provider === 'gemini' ? 'geminiApiKey' : 'openrouterApiKey'
+                        setLocalSettings({ ...localSettings, [key]: e.target.value })
+                      }}
+                      placeholder={`Enter your ${localSettings.provider === 'gemini' ? 'Gemini' : 'OpenRouter'} API key`}
+                      className="w-full p-3 bg-[var(--dark-2)] border border-[var(--grey-0)] rounded focus:border-[var(--primary)] outline-none"
+                    />
+                    <p className="text-xs text-[var(--grey-1)] mt-1">
+                      {localSettings.provider === 'gemini' 
+                        ? 'Get your API key from Google AI Studio'
+                        : 'Get your API key from OpenRouter dashboard'
+                      }
+                    </p>
+                  </>
+                )}
+              </div>
+              
+              {/* Model Selection */}
+              <div className="mb-6">
+                <label className="block text-sm font-medium mb-2">Model</label>
+                {localSettings.provider === 'proxy' ? (
+                  <input
+                    type="text"
+                    value={localSettings.selectedModel}
+                    onChange={(e) => setLocalSettings({ ...localSettings, selectedModel: e.target.value })}
+                    placeholder="Enter model name (e.g., gpt-4, claude-3, etc.)"
+                    className="w-full p-3 bg-[var(--dark-2)] border border-[var(--grey-0)] rounded focus:border-[var(--primary)] outline-none"
+                  />
+                ) : (
+                  <select
+                    value={localSettings.selectedModel}
+                    onChange={(e) => setLocalSettings({ ...localSettings, selectedModel: e.target.value })}
+                    className="w-full p-3 bg-[var(--dark-2)] border border-[var(--grey-0)] rounded focus:border-[var(--primary)] outline-none"
+                  >
+                    {currentModels.map((model) => (
+                      <option key={model.id} value={model.id}>
+                        {model.name}
+                      </option>
+                    ))}
+                  </select>
+                )}
+              </div>
+              
+              {/* Test Connection */}
+              <div className="mb-6">
+                <button
+                  onClick={testConnection}
+                  disabled={testingConnection || (
+                    (localSettings.provider === 'gemini' && !localSettings.geminiApiKey) ||
+                    (localSettings.provider === 'openrouter' && !localSettings.openrouterApiKey) ||
+                    (localSettings.provider === 'proxy' && !localSettings.proxy.url)
+                  )}
+                  className="flex items-center gap-2 px-4 py-2 bg-[var(--dark-2)] border border-[var(--grey-0)] rounded hover:border-[var(--grey-1)] disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  {testingConnection ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
+                      Testing...
+                    </>
+                  ) : (
+                    'Test Connection'
+                  )}
+                </button>
                 
-                <label className="block text-sm font-medium mb-2">Proxy URL</label>
-                <input
-                  type="text"
-                  value={localSettings.proxy.url}
-                  onChange={(e) => setLocalSettings({ 
-                    ...localSettings, 
-                    proxy: { ...localSettings.proxy, url: e.target.value }
-                  })}
-                  placeholder="Enter the proxy URL (e.g., https://your-colab-proxy.com)"
-                  className="w-full p-3 bg-[var(--dark-2)] border border-[var(--grey-0)] rounded focus:border-[var(--primary)] outline-none mb-4"
-                />
-                
-                <label className="block text-sm font-medium mb-2">Proxy API Key (Optional)</label>
-                <input
-                  type="password"
-                  value={localSettings.proxy.apiKey}
-                  onChange={(e) => setLocalSettings({ 
-                    ...localSettings, 
-                    proxy: { ...localSettings.proxy, apiKey: e.target.value }
-                  })}
-                  placeholder="Enter API key if required by your proxy"
-                  className="w-full p-3 bg-[var(--dark-2)] border border-[var(--grey-0)] rounded focus:border-[var(--primary)] outline-none"
-                />
-              </>
-            ) : (
-              <>
+                {connectionStatus && (
+                  <div className={`flex items-center gap-2 mt-2 text-sm ${
+                    connectionStatus === 'success' ? 'text-[var(--status-green)]' : 'text-red-400'
+                  }`}>
+                    {connectionStatus === 'success' ? <FiCheck /> : <FiAlertCircle />}
+                    {connectionStatus === 'success' ? 'Connection successful!' : 'Connection failed. Please check your API key.'}
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+          
+          {/* Parameters Tab */}
+          {activeTab === 'parameters' && (
+            <div className="space-y-6">
+              {/* Temperature */}
+              <div>
                 <label className="block text-sm font-medium mb-2">
-                  {localSettings.provider === 'gemini' ? 'Gemini API Key' : 'OpenRouter API Key'}
+                  Temperature: {localSettings.temperature}
                 </label>
                 <input
-                  type="password"
-                  value={localSettings.provider === 'gemini' ? localSettings.geminiApiKey : localSettings.openrouterApiKey}
-                  onChange={(e) => {
-                    const key = localSettings.provider === 'gemini' ? 'geminiApiKey' : 'openrouterApiKey'
-                    setLocalSettings({ ...localSettings, [key]: e.target.value })
-                  }}
-                  placeholder={`Enter your ${localSettings.provider === 'gemini' ? 'Gemini' : 'OpenRouter'} API key`}
-                  className="w-full p-3 bg-[var(--dark-2)] border border-[var(--grey-0)] rounded focus:border-[var(--primary)] outline-none"
+                  type="range"
+                  min="0"
+                  max="1"
+                  step="0.1"
+                  value={localSettings.temperature}
+                  onChange={(e) => setLocalSettings({ ...localSettings, temperature: parseFloat(e.target.value) })}
+                  className="w-full"
                 />
                 <p className="text-xs text-[var(--grey-1)] mt-1">
-                  {localSettings.provider === 'gemini' 
-                    ? 'Get your API key from Google AI Studio'
-                    : 'Get your API key from OpenRouter dashboard'
-                  }
+                  Controls how creative/random your character is
                 </p>
-              </>
-            )}
-          </div>
-          
-          {/* Model Selection */}
-          <div className="mb-6">
-            <label className="block text-sm font-medium mb-2">Model</label>
-            {localSettings.provider === 'proxy' ? (
-              <input
-                type="text"
-                value={localSettings.selectedModel}
-                onChange={(e) => setLocalSettings({ ...localSettings, selectedModel: e.target.value })}
-                placeholder="Enter model name (e.g., gpt-4, claude-3, etc.)"
-                className="w-full p-3 bg-[var(--dark-2)] border border-[var(--grey-0)] rounded focus:border-[var(--primary)] outline-none"
-              />
-            ) : (
-              <select
-                value={localSettings.selectedModel}
-                onChange={(e) => setLocalSettings({ ...localSettings, selectedModel: e.target.value })}
-                className="w-full p-3 bg-[var(--dark-2)] border border-[var(--grey-0)] rounded focus:border-[var(--primary)] outline-none"
-              >
-                {currentModels.map((model) => (
-                  <option key={model.id} value={model.id}>
-                    {model.name}
-                  </option>
-                ))}
-              </select>
-            )}
-          </div>
-          
-          {/* Test Connection */}
-          <div className="mb-6">
-            <button
-              onClick={testConnection}
-              disabled={testingConnection || (
-                (localSettings.provider === 'gemini' && !localSettings.geminiApiKey) ||
-                (localSettings.provider === 'openrouter' && !localSettings.openrouterApiKey) ||
-                (localSettings.provider === 'proxy' && !localSettings.proxy.url)
-              )}
-              className="flex items-center gap-2 px-4 py-2 bg-[var(--dark-2)] border border-[var(--grey-0)] rounded hover:border-[var(--grey-1)] disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {testingConnection ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-[var(--primary)] border-t-transparent rounded-full animate-spin" />
-                  Testing...
-                </>
-              ) : (
-                'Test Connection'
-              )}
-            </button>
-            
-            {connectionStatus && (
-              <div className={`flex items-center gap-2 mt-2 text-sm ${
-                connectionStatus === 'success' ? 'text-[var(--status-green)]' : 'text-red-400'
-              }`}>
-                {connectionStatus === 'success' ? <FiCheck /> : <FiAlertCircle />}
-                {connectionStatus === 'success' ? 'Connection successful!' : 'Connection failed. Please check your API key.'}
               </div>
-            )}
-          </div>
-          
+              
+              {/* Max Tokens */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Max Tokens: {localSettings.maxTokens}
+                </label>
+                <input
+                  type="range"
+                  min="100"
+                  max="4000"
+                  step="100"
+                  value={localSettings.maxTokens}
+                  onChange={(e) => setLocalSettings({ ...localSettings, maxTokens: parseInt(e.target.value) })}
+                  className="w-full"
+                />
+                <p className="text-xs text-[var(--grey-1)] mt-1">
+                  Controls how much your character can say in one response
+                </p>
+              </div>
+              
+              {/* Context Size */}
+              <div>
+                <label className="block text-sm font-medium mb-2">
+                  Context Size: {localSettings.contextSize.toLocaleString()} tokens
+                </label>
+                <input
+                  type="range"
+                  min="1000"
+                  max="128000"
+                  step="1000"
+                  value={localSettings.contextSize}
+                  onChange={(e) => setLocalSettings({ ...localSettings, contextSize: parseInt(e.target.value) })}
+                  className="w-full"
+                />
+                <div className="flex justify-between text-xs text-[var(--grey-1)] mt-1">
+                  <span>1K</span>
+                  <span>32K</span>
+                  <span>64K</span>
+                  <span>128K</span>
+                </div>
+                <p className="text-xs text-[var(--grey-1)] mt-1">
+                  Controls how much conversation history your character remembers
+                </p>
+              </div>
+              
+              {/* Collapsible Advanced Settings */}
+              <div className="border-t border-[var(--grey-0)] pt-4">
+                <details className="group">
+                  <summary className="cursor-pointer list-none flex items-center justify-between">
+                    <span className="font-medium text-sm">Advanced Settings</span>
+                    <svg className="w-4 h-4 transition-transform group-open:rotate-180" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 9l-7 7-7-7"></path>
+                    </svg>
+                  </summary>
+                  <div className="mt-4 space-y-6">
+                    {/* Provider-specific settings */}
+                    {localSettings.provider !== 'gemini' && (
+                      <>
+                        {/* Repetition Penalty */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Repetition Penalty: {localSettings.repetitionPenalty}
+                          </label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="2"
+                            step="0.1"
+                            value={localSettings.repetitionPenalty}
+                            onChange={(e) => setLocalSettings({ ...localSettings, repetitionPenalty: parseFloat(e.target.value) })}
+                            className="w-full"
+                          />
+                          <p className="text-xs text-[var(--grey-1)] mt-1">
+                            Prevents your character from repeating phrases
+                          </p>
+                        </div>
+                        
+                        {/* Frequency Penalty */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Frequency Penalty: {localSettings.frequencyPenalty}
+                          </label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="2"
+                            step="0.1"
+                            value={localSettings.frequencyPenalty}
+                            onChange={(e) => setLocalSettings({ ...localSettings, frequencyPenalty: parseFloat(e.target.value) })}
+                            className="w-full"
+                          />
+                          <p className="text-xs text-[var(--grey-1)] mt-1">
+                            Encourages using different words/phrases
+                          </p>
+                        </div>
+                        
+                        {/* Presence Penalty */}
+                        <div>
+                          <label className="block text-sm font-medium mb-2">
+                            Presence Penalty: {localSettings.presencePenalty}
+                          </label>
+                          <input
+                            type="range"
+                            min="0"
+                            max="2"
+                            step="0.1"
+                            value={localSettings.presencePenalty}
+                            onChange={(e) => setLocalSettings({ ...localSettings, presencePenalty: parseFloat(e.target.value) })}
+                            className="w-full"
+                          />
+                          <p className="text-xs text-[var(--grey-1)] mt-1">
+                            Encourages discussing new topics
+                          </p>
+                        </div>
+                      </>
+                    )}
+                    
+                    {/* Top-P */}
+                    <div>
+                      <label className="block text-sm font-medium mb-2">
+                        Top-P: {localSettings.topP}
+                      </label>
+                      <input
+                        type="range"
+                        min="0"
+                        max="1"
+                        step="0.05"
+                        value={localSettings.topP}
+                        onChange={(e) => setLocalSettings({ ...localSettings, topP: parseFloat(e.target.value) })}
+                        className="w-full"
+                      />
+                      <p className="text-xs text-[var(--grey-1)] mt-1">
+                        Controls variety in response choices
+                      </p>
+                    </div>
+                  </div>
+                </details>
+              </div>
+            </div>
+          )}
           
           {/* Actions */}
-          <div className="flex gap-3 justify-end">
+          <div className="flex gap-3 justify-end pt-4">
             <button
               onClick={handleCancel}
               className="px-4 py-2 border border-[var(--grey-0)] rounded hover:border-[var(--grey-1)]"

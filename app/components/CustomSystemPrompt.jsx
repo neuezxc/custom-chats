@@ -148,13 +148,13 @@ function CustomSystemPrompt() {
   // Debug logging for placeholder replacement
   useEffect(() => {
     if (showLivePreview && localContent.includes('{{char_description}}')) {
-      console.log('=== CustomSystemPrompt Debug ===')
-      console.log('Character name:', currentCharacter.name)
-      console.log('Character description:', currentCharacter.description)
-      console.log('Original content contains char_description:', localContent.includes('{{char_description}}'))
-      console.log('Processed content:', processedContent)
-      console.log('Character description found in processed content:', processedContent.includes(currentCharacter.description || 'Character description'))
-      console.log('================================')
+ 
+ 
+ 
+ 
+ 
+ 
+ 
     }
   }, [showLivePreview, localContent, currentCharacter, processedContent])
   

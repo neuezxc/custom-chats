@@ -61,11 +61,11 @@ function CharacterChat({ message, character, isLatest = false, isRegenerating: i
       // Detect emotion from the message content
       const detectedEmotion = detectEmotionFromResponse(message.content);
       
-      console.log('💬 Message content:', message.content);
-      console.log('🎭 Detected emotion:', detectedEmotion);
+ 
+ 
       
       if (detectedEmotion && character) {
-        console.log('💾 Setting emotion for character:', character.id, 'emotion:', detectedEmotion);
+ 
         setCharacterEmotion(character.id, detectedEmotion);
       }
     }
@@ -75,7 +75,7 @@ function CharacterChat({ message, character, isLatest = false, isRegenerating: i
   
   // Debug logging for regeneration state
   if (isMessageRegenerating) {
-    console.log('CharacterChat: Message is regenerating:', message.id, 'isLatest:', isLatest)
+ 
   }
   
   // Enhanced function to process all text formatting

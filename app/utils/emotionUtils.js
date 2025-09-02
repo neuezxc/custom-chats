@@ -81,7 +81,7 @@ export function mapEmotionToImage(emotion, images) {
     // Check if we need to map the emotion to a different form
     const mappedEmotion = emotionMappings[targetEmotion] || targetEmotion;
     
-    console.log(`🗺️ Emotion mapping: "${targetEmotion}" → "${mappedEmotion}"`);
+ 
     
     // First, try to find exact match with mapped emotion
     const matchingImage = images.find(image => 
@@ -89,7 +89,7 @@ export function mapEmotionToImage(emotion, images) {
     );
     
     if (matchingImage) {
-      console.log(`✅ Found matching image for "${mappedEmotion}":`, matchingImage.previewUrl);
+ 
       return matchingImage.previewUrl;
     }
     
@@ -100,7 +100,7 @@ export function mapEmotionToImage(emotion, images) {
       );
       
       if (originalMatch) {
-        console.log(`✅ Found matching image for original "${targetEmotion}":`, originalMatch.previewUrl);
+ 
         return originalMatch.previewUrl;
       }
     }
@@ -111,12 +111,12 @@ export function mapEmotionToImage(emotion, images) {
     );
     
     if (neutralImage) {
-      console.log(`🔄 Using neutral fallback:`, neutralImage.previewUrl);
+ 
       return neutralImage.previewUrl;
     }
     
     // Last resort: return first available image
-    console.log(`🎲 Using first available image:`, images[0]?.previewUrl);
+ 
     return images[0]?.previewUrl || null;
   } catch (error) {
     console.warn('Error mapping emotion to image:', emotion, error);

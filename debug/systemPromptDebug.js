@@ -126,36 +126,36 @@ function testBuildSystemPrompt(character, triggeredLore = [], customSettings = n
 
 // Test function
 function runSystemPromptTests() {
-  console.log('🧪 TESTING SYSTEM PROMPT GENERATION\n');
+ 
   
   // Test 1: Character with emotion mode
-  console.log('📝 Test 1: Character with Emotion Mode');
-  console.log('=' + '='.repeat(40));
+ 
+ 
   const emotionPrompt = testBuildSystemPrompt(testCharacterWithEmotions);
-  console.log(emotionPrompt);
-  console.log('\n✅ Should contain: "Choose from these available emotions: happy, sad, angry, neutral, excited"\n');
+ 
+ 
   
   // Test 2: Character without emotion mode
-  console.log('📝 Test 2: Character without Emotion Mode');
-  console.log('=' + '='.repeat(40));
+ 
+ 
   const normalPrompt = testBuildSystemPrompt(testCharacterWithoutEmotions);
-  console.log(normalPrompt);
-  console.log('\n✅ Should NOT contain emotion instructions\n');
+ 
+ 
   
   // Test 3: Custom system prompt with emotions
-  console.log('📝 Test 3: Custom System Prompt with Emotions');
-  console.log('=' + '='.repeat(40));
+ 
+ 
   const customSettings = {
     enabled: true,
     content: `You are {{char}}, a mystical being. {{char_description}}\n\nRespond with magical flair and deep wisdom.`
   };
   const customPrompt = testBuildSystemPrompt(testCharacterWithEmotions, [], customSettings);
-  console.log(customPrompt);
-  console.log('\n✅ Should contain custom content AND emotion instructions\n');
+ 
+ 
   
   // Test 4: Extract and display available emotions
-  console.log('📝 Test 4: Available Emotions Extraction');
-  console.log('=' + '='.repeat(40));
+ 
+ 
   const availableEmotions = testCharacterWithEmotions.imageGallery.images
     .map(image => {
       const filename = image.previewUrl.split("/").pop().toLowerCase();
@@ -167,14 +167,14 @@ function runSystemPromptTests() {
     .filter(Boolean)
     .filter((emotion, index, arr) => arr.indexOf(emotion) === index);
   
-  console.log('Detected emotions:', availableEmotions);
-  console.log('Formatted list:', availableEmotions.join(', '));
+ 
+ 
   
-  console.log('\n🎯 SUMMARY:');
-  console.log('• Emotion instructions are properly added to system prompts');
-  console.log('• Available emotions are dynamically extracted from image filenames');
-  console.log('• Both default and custom system prompts support emotion instructions');
-  console.log('• Non-emotion characters do not get emotion instructions');
+ 
+ 
+ 
+ 
+ 
   
   return {
     emotionPrompt,
@@ -191,9 +191,9 @@ if (typeof window !== 'undefined') {
     withEmotions: testCharacterWithEmotions,
     withoutEmotions: testCharacterWithoutEmotions
   };
-  console.log('🔧 Test functions available:');
-  console.log('  window.runSystemPromptTests()');
-  console.log('  window.testCharacters');
+ 
+ 
+ 
 }
 
 // Auto-run if in Node.js environment

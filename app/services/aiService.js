@@ -1,6 +1,7 @@
 import { GoogleGenerativeAI } from '@google/generative-ai';
 
-// Import buildSystemPrompt function from store\nfunction buildSystemPrompt(character, triggeredLore = [], customSettings = null) {\n  // We need to access the store state, but we can't import useChatStore directly here\n  // due to circular dependencies, so we'll reconstruct the logic\n  \n  const currentUser = { name: 'User', description: 'A curious person exploring conversations with AI characters.' };\n  \n  // Helper function to format triggered lore entries for {{lore}} placeholder\n  function formatTriggeredLore(triggeredLore, character, currentUser) {\n    if (!triggeredLore || triggeredLore.length === 0) {\n      return '';\n    }\n\n    const processedEntries = triggeredLore.map(entry => {\n      let description = entry.description || '';\n\n      // Replace placeholders in each lore entry\n      description = description.replace(/\\{\\{char\\}\\}/g, character.name || 'Character');\n      description = description.replace(/\\{\\{char_description\\}\\}/g, character.description || 'Character description');\n      description = description.replace(/\\{\\{user\\}\\}/g, currentUser.name || 'User');\n      description = description.replace(/\\{\\{user_description\\}\\}/g, currentUser.description || 'A curious person exploring conversations with AI characters.');\n\n      return `${entry.name}: ${description}`;\n    });\n\n    return processedEntries.join('\\n');\n  }
+// Import buildSystemPrompt function from store
+function buildSystemPrompt(character, triggeredLore = [], customSettings = null) {  
   
   // Use custom system prompt if enabled
   if (customSettings?.enabled && customSettings?.content) {
@@ -52,12 +53,12 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
         .filter((emotion, index, arr) => arr.indexOf(emotion) === index);
       
       if (availableEmotions.length > 0) {
-        const emotionInstructions = `\n\nEMOTION INSTRUCTIONS: You must always indicate your current emotion at the end of each message using the format <Emotion="emotion_name">. Choose from these available emotions: ${availableEmotions.join(', ')}. If none of these emotions match your current feeling, use <Emotion="neutral">. The emotion tag will be used to update your visual appearance and should not be displayed to the user.`;
+        const emotionInstructions = `  EMOTION INSTRUCTIONS: You must always indicate your current emotion at the end of each message using the format <Emotion="emotion_name">. Choose from these available emotions: ${availableEmotions.join(', ')}. If none of these emotions match your current feeling, use <Emotion="neutral">. The emotion tag will be used to update your visual appearance and should not be displayed to the user.`;
         customPrompt += emotionInstructions;
       }
     }
     
-    console.log('📋 AIService System Prompt (Custom):', customPrompt);
+ 
     return customPrompt;
   }
   
@@ -66,12 +67,12 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
   
   // Add example dialogue if available
   if (character.exampleDialogue) {
-    systemPrompt += `\n\nExample dialogue: ${character.exampleDialogue}`;
+    systemPrompt += `  Example dialogue: ${character.exampleDialogue}`;
   }
   
   // Add triggered lorebook entries
   if (triggeredLore.length > 0) {
-    systemPrompt += '\n\nRelevant Context:';
+    systemPrompt += '  Relevant Context:';
     triggeredLore.forEach(entry => {
       let description = entry.description;
       // Replace placeholders
@@ -79,7 +80,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
       description = description.replace(/\{\{char_description\}\}/g, character.description);
       description = description.replace(/\{\{user\}\}/g, currentUser.name || 'User');
       description = description.replace(/\{\{user_description\}\}/g, currentUser.description || 'A curious person exploring conversations with AI characters.');
-      systemPrompt += `\n- ${entry.name}: ${description}`;
+      systemPrompt += ` - ${entry.name}: ${description}`;
     });
   }
   
@@ -98,12 +99,12 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
       .filter((emotion, index, arr) => arr.indexOf(emotion) === index);
     
     if (availableEmotions.length > 0) {
-      const emotionInstructions = `\n\nEMOTION INSTRUCTIONS: You must always indicate your current emotion at the end of each message using the format <Emotion="emotion_name">. Choose from these available emotions: ${availableEmotions.join(', ')}. If none of these emotions match your current feeling, use <Emotion="neutral">. The emotion tag will be used to update your visual appearance and should not be displayed to the user.`;
+      const emotionInstructions = `  EMOTION INSTRUCTIONS: You must always indicate your current emotion at the end of each message using the format <Emotion="emotion_name">. Choose from these available emotions: ${availableEmotions.join(', ')}. If none of these emotions match your current feeling, use <Emotion="neutral">. The emotion tag will be used to update your visual appearance and should not be displayed to the user.`;
       systemPrompt += emotionInstructions;
     }
   }
   
-  console.log('📋 AIService System Prompt (Default):', systemPrompt);
+ 
   return systemPrompt;
 }
 
@@ -135,9 +136,6 @@ class AIService {
         if (geminiClient) {
           return await this.generateGeminiResponse(messages, character, geminiClient, modelId);
         }
-      } else if (userApiKeys.provider === 'proxy' && userApiKeys.proxy) {
-        // Use proxy API
-        return await this.generateProxyResponse(messages, character, userApiKeys.proxy, modelId);
       } else {
         // All other models use OpenRouter
         const openRouterKey = this.getOpenRouterKey(userApiKeys.openrouter);
@@ -275,79 +273,55 @@ class AIService {
     return candidate.content.parts[0].text;
   }
 
-  async generateProxyResponse(messages, character, proxySettings, modelId) {
-    // Build proper system prompt with emotion instructions
-    const systemPrompt = buildSystemPrompt(character, [], null);
-    
-    // Format messages properly for proxy API with correct role assignments
-    const formattedMessages = [
-      { role: 'system', content: systemPrompt },
-      ...messages.map(msg => {
-        let role;
-        if (msg.role === 'system') {
-          role = 'system';
-        } else if (msg.role === 'model' || msg.type === 'character') {
-          role = 'assistant'; // Standard for character responses
-        } else {
-          role = 'user';
-        }
-        
-        return {
-          role: role,
-          content: msg.content
-        };
-      })
-    ];
+  // Auto-generate lorebook entries for a character
+  async generateLorebookEntries(characterData, apiSettings, userApiKeys = {}) {
+    try {
+      const prompt = `You are an expert character lorebook creator. Based on the following character information, create 3-5 lorebook entries that would help an AI character roleplay more effectively.
+      
+Character Name: ${characterData.name}
+Character Description: ${characterData.description}
+First Message: ${characterData.firstMessage}
+Example Dialogue: ${characterData.exampleDialogue}
 
-    // Prepare headers for the proxy request
-    const headers = {
-      'Content-Type': 'application/json',
-    };
+Please provide lorebook entries in the following JSON format:
+[
+  {
+    "name": "Entry Name",
+    "triggers": ["trigger1", "trigger2"],
+    "description": "Detailed description of the entry with context",
+    "isActive": true
+  }
+]
 
-    // Add API key if provided
-    if (proxySettings.apiKey) {
-      headers['Authorization'] = `Bearer ${proxySettings.apiKey}`;
+Guidelines:
+1. Focus on important people, places, items, and concepts mentioned in the character data
+2. Include relevant background information that would help the AI understand context
+3. Use specific trigger words that might appear in conversations
+4. Make entries detailed but concise
+5. Return only valid JSON, no other text
+
+Lorebook Entries:`;
+
+      // Use the same provider and model as currently configured
+      const modelId = apiSettings.selectedModel;
+      
+      // Create a simple message structure for the AI service
+      const messages = [
+        { role: 'user', content: prompt }
+      ];
+
+      // Use a minimal character object since we're not roleplaying
+      const character = {
+        name: characterData.name,
+        description: 'Lorebook generator assistant',
+        imageGallery: { mode: 'default', images: [] }
+      };
+
+      return await this.generateResponse(messages, character, modelId, userApiKeys);
+    } catch (error) {
+      console.error('Lorebook Generation Error:', error);
+      throw new Error('Failed to generate lorebook entries');
     }
-
-    const response = await fetch(proxySettings.url, {
-      method: 'POST',
-      headers: headers,
-      body: JSON.stringify({
-        model: modelId,
-        messages: formattedMessages,
-        temperature: 0.8,
-        max_tokens: 1000
-      })
-    });
-
-    if (!response.ok) {
-      throw new Error(`Proxy API error: ${response.status}`);
-    }
-
-    const data = await response.json();
-    
-    // Extract response text - this may vary based on your proxy implementation
-    // This is a generic approach that tries common response formats
-    let responseText = '';
-    
-    if (data.choices && data.choices[0] && data.choices[0].message) {
-      // OpenAI/OpenRouter format
-      responseText = data.choices[0].message.content;
-    } else if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
-      // Gemini format
-      responseText = data.candidates[0].content.parts[0].text;
-    } else if (data.content) {
-      // Simple content format
-      responseText = data.content;
-    } else if (data.text) {
-      // Simple text format
-      responseText = data.text;
-    } else {
-      // Try to stringify the entire response as a fallback
-      responseText = JSON.stringify(data);
-    }
-    
-    return responseText || 'Sorry, I couldn\'t generate a response.';
   }
 }
 

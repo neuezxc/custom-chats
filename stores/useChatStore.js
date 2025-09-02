@@ -77,6 +77,14 @@ const useChatStore = create(
           apiKey: ""
         },
         selectedModel: "gemini-2.5-flash",
+        // Advanced settings
+        temperature: 0.7,
+        maxTokens: 1000,
+        contextSize: 32000, // 32K tokens
+        repetitionPenalty: 1.0,
+        frequencyPenalty: 0.0,
+        presencePenalty: 0.0,
+        topP: 0.95
       },
 
       // UI State
@@ -1014,6 +1022,14 @@ const useChatStore = create(
               apiKey: ""
             },
             selectedModel: "gemini-2.5-flash",
+            // Advanced settings
+            temperature: 0.7,
+            maxTokens: 1000,
+            contextSize: 32000, // 32K tokens
+            repetitionPenalty: 1.0,
+            frequencyPenalty: 0.0,
+            presencePenalty: 0.0,
+            topP: 0.95
           },
           displaySettings: {
             primaryColor: "#5373cc",
@@ -1260,6 +1276,7 @@ const useChatStore = create(
                   currentCharacter,
                   apiSettings.proxy,
                   apiSettings.selectedModel,
+                  apiSettings,
                   conversationContext,
                   triggeredLore
                 );
@@ -1451,6 +1468,7 @@ const useChatStore = create(
                   currentCharacter,
                   apiSettings.proxy,
                   apiSettings.selectedModel,
+                  apiSettings,
                   conversationContext,
                   triggeredLore
                 );
@@ -1640,7 +1658,7 @@ const useChatStore = create(
         let regenerationTimeout = null;
 
         try {
-          console.log("Starting regeneration for message:", messageId);
+ 
           set({ isRegenerating: true, regeneratingMessageId: messageId });
 
           // Record start time for minimum loading duration
@@ -1725,6 +1743,7 @@ const useChatStore = create(
                   currentCharacter,
                   apiSettings.proxy,
                   apiSettings.selectedModel,
+                  apiSettings,
                   conversationContext,
                   triggeredLore
                 );
@@ -1848,7 +1867,7 @@ const useChatStore = create(
             };
           });
         } finally {
-          console.log("Regeneration completed for message:", messageId);
+ 
 
           // Clear any regeneration timeout
           if (regenerationTimeout) {
@@ -2172,6 +2191,7 @@ const useChatStore = create(
                   currentCharacter,
                   apiSettings.proxy,
                   apiSettings.selectedModel,
+                  apiSettings,
                   conversationContext,
                   triggeredLore
                 );
@@ -2445,7 +2465,7 @@ function buildSystemPrompt(
       }
     }
 
-    console.log("📋 System Prompt:", customPrompt);
+ 
 
     return customPrompt;
   }
@@ -2514,9 +2534,15 @@ function buildSystemPrompt(
 // Helper function to prepare conversation context
 function prepareConversationContext(messages, maxMessages = 10) {
   // Get recent messages for context, excluding error messages
-  const validMessages = messages
-    .filter((msg) => !msg.isError)
-    .slice(-maxMessages);
+  // Exclude the most recent message if it's a user message (since it will be added separately)
+  let validMessages = messages.filter((msg) => !msg.isError);
+  
+  // Check if the last message is a user message and exclude it
+  if (validMessages.length > 0 && validMessages[validMessages.length - 1].type === "user") {
+    validMessages = validMessages.slice(0, -1);
+  }
+  
+  validMessages = validMessages.slice(-maxMessages);
 
   const processedMessages = validMessages.map((msg) => {
     let role;
@@ -2568,8 +2594,49 @@ async function callGeminiAPI(
     customSystemPrompt
   );
 
-  console.log("💬 User Input:", userMessage);
-  console.log("📄 Chat History:", conversationContext);
+  // Use advanced settings if provided, otherwise use defaults
+  const temperature = apiSettings.temperature !== undefined ? apiSettings.temperature : 0.7;
+  const topK = 40;
+  const topP = apiSettings.topP !== undefined ? apiSettings.topP : 0.95;
+  const maxOutputTokens = apiSettings.maxTokens !== undefined ? apiSettings.maxTokens : 1024;
+  const contextTokenLimit = apiSettings.contextSize !== undefined ? apiSettings.contextSize : 32000;
+  
+  // Simple token estimation (rough approximation: ~4 chars = 1 token)
+  function estimateTokens(text) {
+    if (!text) return 0;
+    return Math.ceil(text.length / 4);
+  }
+  
+  // Filter messages based on token limit
+  function filterMessagesByTokenLimit(messages, tokenLimit) {
+    if (!messages || messages.length === 0) return [];
+    
+    const filteredMessages = [];
+    let totalTokens = 0;
+    
+    // Start from the most recent messages and work backwards
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const message = messages[i];
+      const messageTokens = estimateTokens(message.content) + 20; // +20 for role/format overhead
+      
+      // Check if adding this message would exceed the limit
+      if (totalTokens + messageTokens <= tokenLimit) {
+        filteredMessages.unshift(message); // Add to beginning to maintain order
+        totalTokens += messageTokens;
+      } else {
+        // Stop when we can't fit more messages
+        break;
+      }
+    }
+    
+    return filteredMessages;
+  }
+  
+  // Filter messages based on token limit
+  const filteredMessages = filterMessagesByTokenLimit(conversationContext, contextTokenLimit);
+
+ 
+ 
 
   try {
     // Follow the official documentation structure
@@ -2578,7 +2645,7 @@ async function callGeminiAPI(
     const ai = new GoogleGenAI(apiSettings.geminiApiKey);
 
     // Prepare conversation history for Gemini chat format
-    const history = conversationContext.map((msg) => ({
+    const history = filteredMessages.map((msg) => ({
       role: msg.role,
       parts: [{ text: msg.content }],
     }));
@@ -2588,10 +2655,10 @@ async function callGeminiAPI(
       model: apiSettings.selectedModel,
       systemInstruction: systemPrompt,
       generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
+        temperature: temperature,
+        topK: topK,
+        topP: topP,
+        maxOutputTokens: maxOutputTokens,
       },
     });
 
@@ -2605,10 +2672,10 @@ async function callGeminiAPI(
 
     return response.response.text();
   } catch (error) {
-    console.log("SDK failed, using REST API fallback:", error.message);
+ 
 
     // For REST API, we need to build the contents array with proper roles
-    const contents = conversationContext.map((msg) => ({
+    const contents = filteredMessages.map((msg) => ({
       role: msg.role,
       parts: [{ text: msg.content }],
     }));
@@ -2636,10 +2703,10 @@ async function callGeminiAPI(
         ],
       },
       generationConfig: {
-        temperature: 0.7,
-        topK: 40,
-        topP: 0.95,
-        maxOutputTokens: 1024,
+        temperature: temperature,
+        topK: topK,
+        topP: topP,
+        maxOutputTokens: maxOutputTokens,
       },
     };
 
@@ -2724,6 +2791,49 @@ async function callOpenRouterAPI(
     customSystemPrompt
   );
 
+  // Use advanced settings if provided, otherwise use defaults
+  const temperature = apiSettings.temperature !== undefined ? apiSettings.temperature : 0.7;
+  const maxTokens = apiSettings.maxTokens !== undefined ? apiSettings.maxTokens : 1024;
+  const contextTokenLimit = apiSettings.contextSize !== undefined ? apiSettings.contextSize : 32000;
+  const repetitionPenalty = apiSettings.repetitionPenalty !== undefined ? apiSettings.repetitionPenalty : 1.0;
+  const frequencyPenalty = apiSettings.frequencyPenalty !== undefined ? apiSettings.frequencyPenalty : 0.0;
+  const presencePenalty = apiSettings.presencePenalty !== undefined ? apiSettings.presencePenalty : 0.0;
+  const topP = apiSettings.topP !== undefined ? apiSettings.topP : 0.95;
+  
+  // Simple token estimation (rough approximation: ~4 chars = 1 token)
+  function estimateTokens(text) {
+    if (!text) return 0;
+    return Math.ceil(text.length / 4);
+  }
+  
+  // Filter messages based on token limit
+  function filterMessagesByTokenLimit(messages, tokenLimit) {
+    if (!messages || messages.length === 0) return [];
+    
+    const filteredMessages = [];
+    let totalTokens = 0;
+    
+    // Start from the most recent messages and work backwards
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const message = messages[i];
+      const messageTokens = estimateTokens(message.content) + 20; // +20 for role/format overhead
+      
+      // Check if adding this message would exceed the limit
+      if (totalTokens + messageTokens <= tokenLimit) {
+        filteredMessages.unshift(message); // Add to beginning to maintain order
+        totalTokens += messageTokens;
+      } else {
+        // Stop when we can't fit more messages
+        break;
+      }
+    }
+    
+    return filteredMessages;
+  }
+  
+  // Filter messages based on token limit
+  const filteredMessages = filterMessagesByTokenLimit(conversationContext, contextTokenLimit);
+
   // Prepare messages array with proper role assignments
   const messages = [
     {
@@ -2733,7 +2843,7 @@ async function callOpenRouterAPI(
   ];
 
   // Add conversation context with proper role mapping
-  conversationContext.forEach((msg) => {
+  filteredMessages.forEach((msg) => {
     let role;
     if (msg.role === "model") {
       role = "assistant"; // OpenRouter uses 'assistant' for character responses
@@ -2768,8 +2878,12 @@ async function callOpenRouterAPI(
       body: JSON.stringify({
         model: apiSettings.selectedModel,
         messages: messages,
-        temperature: 0.7,
-        max_tokens: 1024,
+        temperature: temperature,
+        max_tokens: maxTokens,
+        repetition_penalty: repetitionPenalty,
+        frequency_penalty: frequencyPenalty,
+        presence_penalty: presencePenalty,
+        top_p: topP,
       }),
     }
   );
@@ -2793,6 +2907,7 @@ async function callProxyAPI(
   character,
   proxySettings,
   modelId,
+  apiSettings,
   conversationContext = [],
   triggeredLore = []
 ) {
@@ -2803,6 +2918,49 @@ async function callProxyAPI(
     customSystemPrompt
   );
 
+  // Use advanced settings if provided, otherwise use defaults
+  const temperature = apiSettings.temperature !== undefined ? apiSettings.temperature : 0.7;
+  const maxTokens = apiSettings.maxTokens !== undefined ? apiSettings.maxTokens : 1024;
+  const contextTokenLimit = apiSettings.contextSize !== undefined ? apiSettings.contextSize : 32000;
+  const repetitionPenalty = apiSettings.repetitionPenalty !== undefined ? apiSettings.repetitionPenalty : 1.0;
+  const frequencyPenalty = apiSettings.frequencyPenalty !== undefined ? apiSettings.frequencyPenalty : 0.0;
+  const presencePenalty = apiSettings.presencePenalty !== undefined ? apiSettings.presencePenalty : 0.0;
+  const topP = apiSettings.topP !== undefined ? apiSettings.topP : 0.95;
+  
+  // Simple token estimation (rough approximation: ~4 chars = 1 token)
+  function estimateTokens(text) {
+    if (!text) return 0;
+    return Math.ceil(text.length / 4);
+  }
+  
+  // Filter messages based on token limit
+  function filterMessagesByTokenLimit(messages, tokenLimit) {
+    if (!messages || messages.length === 0) return [];
+    
+    const filteredMessages = [];
+    let totalTokens = 0;
+    
+    // Start from the most recent messages and work backwards
+    for (let i = messages.length - 1; i >= 0; i--) {
+      const message = messages[i];
+      const messageTokens = estimateTokens(message.content) + 20; // +20 for role/format overhead
+      
+      // Check if adding this message would exceed the limit
+      if (totalTokens + messageTokens <= tokenLimit) {
+        filteredMessages.unshift(message); // Add to beginning to maintain order
+        totalTokens += messageTokens;
+      } else {
+        // Stop when we can't fit more messages
+        break;
+      }
+    }
+    
+    return filteredMessages;
+  }
+  
+  // Filter messages based on token limit
+  const filteredMessages = filterMessagesByTokenLimit(conversationContext, contextTokenLimit);
+
   // Prepare messages array with proper role assignments
   const messages = [
     {
@@ -2812,10 +2970,10 @@ async function callProxyAPI(
   ];
 
   // Add conversation context with proper role mapping
-  conversationContext.forEach((msg) => {
+  filteredMessages.forEach((msg) => {
     let role;
     if (msg.role === "model") {
-      role = "assistant"; // Standard for character responses
+      role = "assistant"; // OpenRouter uses 'assistant' for character responses
     } else if (msg.role === "assistant") {
       role = "assistant"; // Already correct
     } else {
@@ -2850,8 +3008,12 @@ async function callProxyAPI(
     body: JSON.stringify({
       model: modelId,
       messages: messages,
-      temperature: 0.7,
-      max_tokens: 1024,
+      temperature: temperature,
+      max_tokens: maxTokens,
+      repetition_penalty: repetitionPenalty,
+      frequency_penalty: frequencyPenalty,
+      presence_penalty: presencePenalty,
+      top_p: topP,
     }),
   });
 
