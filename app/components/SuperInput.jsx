@@ -21,7 +21,11 @@ function SuperInput() {
   // Check API status
   const hasApiKey = apiSettings.provider === 'gemini'
     ? apiSettings.geminiApiKey
-    : apiSettings.openrouterApiKey;
+    : apiSettings.provider === 'openrouter'
+    ? apiSettings.openrouterApiKey
+    : apiSettings.provider === 'proxy' && apiSettings.proxy
+    ? apiSettings.proxy.url
+    : false;
 
   const statusColor = hasApiKey ? 'var(--status-green)' : 'var(--status-red)';
   const statusTitle = hasApiKey ? 'API configured' : 'No API key configured';

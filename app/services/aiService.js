@@ -135,6 +135,9 @@ class AIService {
         if (geminiClient) {
           return await this.generateGeminiResponse(messages, character, geminiClient, modelId);
         }
+      } else if (userApiKeys.provider === 'proxy' && userApiKeys.proxy) {
+        // Use proxy API
+        return await this.generateProxyResponse(messages, character, userApiKeys.proxy, modelId);
       } else {
         // All other models use OpenRouter
         const openRouterKey = this.getOpenRouterKey(userApiKeys.openrouter);
@@ -270,6 +273,81 @@ class AIService {
     }
     
     return candidate.content.parts[0].text;
+  }
+
+  async generateProxyResponse(messages, character, proxySettings, modelId) {
+    // Build proper system prompt with emotion instructions
+    const systemPrompt = buildSystemPrompt(character, [], null);
+    
+    // Format messages properly for proxy API with correct role assignments
+    const formattedMessages = [
+      { role: 'system', content: systemPrompt },
+      ...messages.map(msg => {
+        let role;
+        if (msg.role === 'system') {
+          role = 'system';
+        } else if (msg.role === 'model' || msg.type === 'character') {
+          role = 'assistant'; // Standard for character responses
+        } else {
+          role = 'user';
+        }
+        
+        return {
+          role: role,
+          content: msg.content
+        };
+      })
+    ];
+
+    // Prepare headers for the proxy request
+    const headers = {
+      'Content-Type': 'application/json',
+    };
+
+    // Add API key if provided
+    if (proxySettings.apiKey) {
+      headers['Authorization'] = `Bearer ${proxySettings.apiKey}`;
+    }
+
+    const response = await fetch(proxySettings.url, {
+      method: 'POST',
+      headers: headers,
+      body: JSON.stringify({
+        model: modelId,
+        messages: formattedMessages,
+        temperature: 0.8,
+        max_tokens: 1000
+      })
+    });
+
+    if (!response.ok) {
+      throw new Error(`Proxy API error: ${response.status}`);
+    }
+
+    const data = await response.json();
+    
+    // Extract response text - this may vary based on your proxy implementation
+    // This is a generic approach that tries common response formats
+    let responseText = '';
+    
+    if (data.choices && data.choices[0] && data.choices[0].message) {
+      // OpenAI/OpenRouter format
+      responseText = data.choices[0].message.content;
+    } else if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+      // Gemini format
+      responseText = data.candidates[0].content.parts[0].text;
+    } else if (data.content) {
+      // Simple content format
+      responseText = data.content;
+    } else if (data.text) {
+      // Simple text format
+      responseText = data.text;
+    } else {
+      // Try to stringify the entire response as a fallback
+      responseText = JSON.stringify(data);
+    }
+    
+    return responseText || 'Sorry, I couldn\'t generate a response.';
   }
 }
 

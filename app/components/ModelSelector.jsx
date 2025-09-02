@@ -13,7 +13,7 @@ function ModelSelector() {
   const dropdownRef = useRef(null);
 
   // Get current model info
-  const currentModels = availableModels[apiSettings.provider] || [];
+  const currentModels = apiSettings.provider === 'proxy' ? [] : availableModels[apiSettings.provider] || [];
   const currentModel = currentModels.find(m => m.id === apiSettings.selectedModel);
 
   const handleModelSelect = (modelId) => {
@@ -34,6 +34,21 @@ function ModelSelector() {
       document.removeEventListener("mousedown", handleClickOutside);
     };
   }, [dropdownRef]);
+
+  // For proxy provider, show an input field instead of a dropdown
+  if (apiSettings.provider === 'proxy') {
+    return (
+      <div className="relative" ref={dropdownRef}>
+        <input
+          type="text"
+          value={apiSettings.selectedModel}
+          onChange={(e) => updateApiSettings({ selectedModel: e.target.value })}
+          placeholder="Enter model name"
+          className="h-[30px] w-[200px] p-2 border border-[var(--grey-0)] bg-[var(--dark-1)] cursor-pointer hover:border-[var(--grey-1)] rounded text-white/80 text-sm"
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="relative" ref={dropdownRef}>

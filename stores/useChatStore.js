@@ -68,9 +68,14 @@ const useChatStore = create(
 
       // API Configuration
       apiSettings: {
-        provider: "gemini", // 'gemini' or 'openrouter'
+        provider: "gemini", // 'gemini', 'openrouter', or 'proxy'
         geminiApiKey: "",
         openrouterApiKey: "",
+        proxy: {
+          name: "",
+          url: "",
+          apiKey: ""
+        },
         selectedModel: "gemini-2.5-flash",
       },
 
@@ -117,6 +122,7 @@ const useChatStore = create(
           { id: "moonshotai/kimi-k2:free", name: "Kimi K2 (free)" },
           { id: "qwen/qwen3-235b-a22b:free", name: "Qwen3 235B A22B (free)" },
         ],
+        proxy: [],
       },
 
       // Actions
@@ -1002,6 +1008,11 @@ const useChatStore = create(
             provider: "gemini",
             geminiApiKey: "",
             openrouterApiKey: "",
+            proxy: {
+              name: "",
+              url: "",
+              apiKey: ""
+            },
             selectedModel: "gemini-2.5-flash",
           },
           displaySettings: {
@@ -1207,7 +1218,11 @@ const useChatStore = create(
           const hasApiKey =
             apiSettings.provider === "gemini"
               ? apiSettings.geminiApiKey
-              : apiSettings.openrouterApiKey;
+              : apiSettings.provider === "openrouter"
+              ? apiSettings.openrouterApiKey
+              : apiSettings.provider === "proxy" && apiSettings.proxy
+              ? apiSettings.proxy.url
+              : false;
 
           if (!hasApiKey) {
             throw new Error("No API key configured");
@@ -1235,6 +1250,16 @@ const useChatStore = create(
                   validatedText,
                   currentCharacter,
                   apiSettings,
+                  conversationContext,
+                  triggeredLore
+                );
+              } else if (apiSettings.provider === "proxy" && apiSettings.proxy) {
+                // For proxy, we need to pass the proxy settings
+                response = await callProxyAPI(
+                  validatedText,
+                  currentCharacter,
+                  apiSettings.proxy,
+                  apiSettings.selectedModel,
                   conversationContext,
                   triggeredLore
                 );
@@ -1381,7 +1406,11 @@ const useChatStore = create(
           const hasApiKey =
             apiSettings.provider === "gemini"
               ? apiSettings.geminiApiKey
-              : apiSettings.openrouterApiKey;
+              : apiSettings.provider === "openrouter"
+              ? apiSettings.openrouterApiKey
+              : apiSettings.provider === "proxy" && apiSettings.proxy
+              ? apiSettings.proxy.url
+              : false;
 
           if (!hasApiKey) {
             throw new Error("No API key configured");
@@ -1412,6 +1441,16 @@ const useChatStore = create(
                   userMessage.content,
                   currentCharacter,
                   apiSettings,
+                  conversationContext,
+                  triggeredLore
+                );
+              } else if (apiSettings.provider === "proxy" && apiSettings.proxy) {
+                // For proxy, we need to pass the proxy settings
+                response = await callProxyAPI(
+                  userMessage.content,
+                  currentCharacter,
+                  apiSettings.proxy,
+                  apiSettings.selectedModel,
                   conversationContext,
                   triggeredLore
                 );
@@ -1520,7 +1559,11 @@ const useChatStore = create(
         const hasApiKey =
           apiSettings.provider === "gemini"
             ? apiSettings.geminiApiKey
-            : apiSettings.openrouterApiKey;
+            : apiSettings.provider === "openrouter"
+            ? apiSettings.openrouterApiKey
+            : apiSettings.provider === "proxy" && apiSettings.proxy
+            ? apiSettings.proxy.url
+            : false;
 
         if (!hasApiKey) {
           console.error("No API key configured for regeneration");
@@ -1637,7 +1680,11 @@ const useChatStore = create(
           const hasApiKey =
             apiSettings.provider === "gemini"
               ? apiSettings.geminiApiKey
-              : apiSettings.openrouterApiKey;
+              : apiSettings.provider === "openrouter"
+              ? apiSettings.openrouterApiKey
+              : apiSettings.provider === "proxy" && apiSettings.proxy
+              ? apiSettings.proxy.url
+              : false;
 
           if (!hasApiKey) {
             throw new Error("No API key configured");
@@ -1668,6 +1715,16 @@ const useChatStore = create(
                   parentUserMessage.content,
                   currentCharacter,
                   apiSettings,
+                  conversationContext,
+                  triggeredLore
+                );
+              } else if (apiSettings.provider === "proxy" && apiSettings.proxy) {
+                // For proxy, we need to pass the proxy settings
+                response = await callProxyAPI(
+                  parentUserMessage.content,
+                  currentCharacter,
+                  apiSettings.proxy,
+                  apiSettings.selectedModel,
                   conversationContext,
                   triggeredLore
                 );
@@ -2071,7 +2128,11 @@ const useChatStore = create(
           const hasApiKey =
             apiSettings.provider === "gemini"
               ? apiSettings.geminiApiKey
-              : apiSettings.openrouterApiKey;
+              : apiSettings.provider === "openrouter"
+              ? apiSettings.openrouterApiKey
+              : apiSettings.provider === "proxy" && apiSettings.proxy
+              ? apiSettings.proxy.url
+              : false;
 
           if (!hasApiKey) {
             throw new Error("No API key configured");
@@ -2101,6 +2162,16 @@ const useChatStore = create(
                   validatedContent,
                   currentCharacter,
                   apiSettings,
+                  conversationContext,
+                  triggeredLore
+                );
+              } else if (apiSettings.provider === "proxy" && apiSettings.proxy) {
+                // For proxy, we need to pass the proxy settings
+                response = await callProxyAPI(
+                  validatedContent,
+                  currentCharacter,
+                  apiSettings.proxy,
+                  apiSettings.selectedModel,
                   conversationContext,
                   triggeredLore
                 );
@@ -2714,6 +2785,109 @@ async function callOpenRouterAPI(
 
   const data = await response.json();
   return data.choices[0].message.content;
+}
+
+// Helper function for Proxy API with enhanced context
+async function callProxyAPI(
+  userMessage,
+  character,
+  proxySettings,
+  modelId,
+  conversationContext = [],
+  triggeredLore = []
+) {
+  const { customSystemPrompt } = useChatStore.getState();
+  const systemPrompt = buildSystemPrompt(
+    character,
+    triggeredLore,
+    customSystemPrompt
+  );
+
+  // Prepare messages array with proper role assignments
+  const messages = [
+    {
+      role: "system",
+      content: systemPrompt,
+    },
+  ];
+
+  // Add conversation context with proper role mapping
+  conversationContext.forEach((msg) => {
+    let role;
+    if (msg.role === "model") {
+      role = "assistant"; // Standard for character responses
+    } else if (msg.role === "assistant") {
+      role = "assistant"; // Already correct
+    } else {
+      role = "user";
+    }
+
+    messages.push({
+      role: role,
+      content: msg.content,
+    });
+  });
+
+  // Add current message
+  messages.push({
+    role: "user",
+    content: userMessage,
+  });
+
+  // Prepare headers for the proxy request
+  const headers = {
+    "Content-Type": "application/json",
+  };
+
+  // Add API key if provided
+  if (proxySettings.apiKey) {
+    headers["Authorization"] = `Bearer ${proxySettings.apiKey}`;
+  }
+
+  const response = await fetch(proxySettings.url, {
+    method: "POST",
+    headers: headers,
+    body: JSON.stringify({
+      model: modelId,
+      messages: messages,
+      temperature: 0.7,
+      max_tokens: 1024,
+    }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(
+      `Proxy API error: ${response.status} - ${
+        errorData.error?.message || response.statusText
+      }`
+    );
+  }
+
+  const data = await response.json();
+  
+  // Extract response text - this may vary based on your proxy implementation
+  // This is a generic approach that tries common response formats
+  let responseText = '';
+  
+  if (data.choices && data.choices[0] && data.choices[0].message) {
+    // OpenAI/OpenRouter format
+    responseText = data.choices[0].message.content;
+  } else if (data.candidates && data.candidates[0] && data.candidates[0].content && data.candidates[0].content.parts) {
+    // Gemini format
+    responseText = data.candidates[0].content.parts[0].text;
+  } else if (data.content) {
+    // Simple content format
+    responseText = data.content;
+  } else if (data.text) {
+    // Simple text format
+    responseText = data.text;
+  } else {
+    // Try to stringify the entire response as a fallback
+    responseText = JSON.stringify(data);
+  }
+  
+  return responseText;
 }
 
 export default useChatStore;
