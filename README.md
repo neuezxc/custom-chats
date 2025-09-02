@@ -39,3 +39,8 @@ Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/bui
 # custom-chats
 # custom-chats
 # custom-chats
+
+
+user ask ai -> always put this <test> on your response ->
+in replacer -> find(input) -> <test> -> output(what to replacement): textarea -> <h1>hello world</h1>
+in chat -> userchat -> original llm response -> blablabla <test> -> display -> blablablabla <h1>hello world</h1>

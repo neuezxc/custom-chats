@@ -85,11 +85,6 @@ function CharacterChat({ message, character, isLatest = false, isRegenerating: i
     // First remove emotion tags (they're used for gallery, not display)
     let processedText = removeEmotionTags(text);
     
-    // Then escape HTML to prevent injection
-    processedText = processedText
-      .replace(/&/g, '&amp;')
-      .replace(/</g, '&lt;')
-      .replace(/>/g, '&gt;');
     
     // Replace placeholders with actual names
     processedText = processedText.replace(/\{\{char\}\}/g, character.name || 'Character');

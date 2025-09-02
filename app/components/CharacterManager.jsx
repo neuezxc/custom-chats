@@ -40,12 +40,7 @@ function CharacterManager() {
   const [editingLorebookId, setEditingLorebookId] = useState(null)
   const [imageGalleryError, setImageGalleryError] = useState('')
   const [storageError, setStorageError] = useState('')
-  const [compressionSettings, setCompressionSettings] = useState({
-    enabled: true,
-    maxWidth: 800,
-    maxHeight: 600,
-    quality: 0.8
-  })
+  const [activeTab, setActiveTab] = useState('basic')
   const fileInputRef = useRef(null)
 
   function getDefaultForm() {
@@ -90,8 +85,12 @@ function CharacterManager() {
           }
         })
       }
+      // Set default tab to basic when editing
+      setActiveTab('basic')
     } else if (characterManagerMode === 'create') {
       setEditForm(getDefaultForm())
+      // Set default tab to basic when creating
+      setActiveTab('basic')
     }
     // Clear any previous errors when switching modes
     setImageGalleryError('')
@@ -315,10 +314,8 @@ function CharacterManager() {
         return
       }
       
-      // Generate preview with compression settings
-      const previewUrl = compressionSettings.enabled 
-        ? await generateImagePreview(file, compressionSettings.maxWidth, compressionSettings.maxHeight, compressionSettings.quality)
-        : await generateImagePreview(file, 1920, 1080, 1.0) // No compression
+      // Generate preview with default compression settings
+      const previewUrl = await generateImagePreview(file, 800, 600, 0.8)
       
       // Create image data
       const imageData = {
@@ -572,266 +569,224 @@ function CharacterManager() {
 
           {(characterManagerMode === 'create' || characterManagerMode === 'edit') && (
             <div className="max-w-2xl mx-auto space-y-8">
-              {/* Progress Indicator */}
-              <div className="flex items-center gap-4 mb-8">
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-[var(--primary)] rounded-full flex items-center justify-center">
-                    <FiUser size={16} className="text-white" />
-                  </div>
-                  <span className="text-sm font-medium text-white">Character Details</span>
-                </div>
+              {/* Tab Navigation */}
+              <div className="flex border-b border-[var(--grey-0)] mb-6">
+                <button
+                  onClick={() => setActiveTab('basic')}
+                  className={`px-4 py-2 font-medium text-sm relative ${
+                    activeTab === 'basic'
+                      ? 'text-[var(--primary)] border-b-2 border-[var(--primary)]'
+                      : 'text-[var(--grey-1)] hover:text-white'
+                  }`}
+                >
+                  Basic Info
+                </button>
+                <button
+                  onClick={() => setActiveTab('images')}
+                  className={`px-4 py-2 font-medium text-sm relative ${
+                    activeTab === 'images'
+                      ? 'text-[var(--primary)] border-b-2 border-[var(--primary)]'
+                      : 'text-[var(--grey-1)] hover:text-white'
+                  }`}
+                >
+                  Images
+                </button>
                 {characterManagerMode === 'edit' && (
-                  <>
-                    <div className="h-px bg-[var(--grey-0)] flex-1" />
-                    <div className="flex items-center gap-2">
-                      <div className="w-8 h-8 bg-[var(--grey-0)] rounded-full flex items-center justify-center">
-                        <FiBook size={16} className="text-[var(--grey-1)]" />
-                      </div>
-                      <span className="text-sm text-[var(--grey-1)]">Lorebook</span>
-                    </div>
-                  </>
+                  <button
+                    onClick={() => setActiveTab('lorebook')}
+                    className={`px-4 py-2 font-medium text-sm relative ${
+                      activeTab === 'lorebook'
+                        ? 'text-[var(--primary)] border-b-2 border-[var(--primary)]'
+                        : 'text-[var(--grey-1)] hover:text-white'
+                    }`}
+                  >
+                    Lorebook
+                  </button>
                 )}
               </div>
 
-              {/* Character Form */}
-              <div className="bg-[var(--dark-2)] rounded-lg p-4 sm:p-6 border border-[var(--grey-0)]">
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <FiUser size={20} className="text-[var(--primary)]" />
-                    <h3 className="text-lg font-semibold text-white">Character Information</h3>
-                  </div>
-                  
-                  {/* Name Field */}
-                  <div>
-                    <label className="block text-sm font-medium text-white mb-2">
-                      Character Name <span className="text-red-400">*</span>
-                    </label>
-                    <input
-                      type="text"
-                      value={editForm.name}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
-                      className="w-full p-3 bg-[var(--dark-1)] border border-[var(--grey-0)] rounded-lg text-white placeholder-[var(--grey-2)] focus:border-[var(--primary)] outline-none transition-colors"
-                      placeholder="Enter character name (e.g., Hayeon)"
-                      autoFocus={characterManagerMode === 'create'}
-                    />
-                  </div>
+              {/* Character Information - Basic Info Tab */}
+              {(activeTab === 'basic') && (
+                <>
+                  <div className="bg-[var(--dark-2)] rounded-lg p-4 sm:p-6 border border-[var(--grey-0)]">
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <FiUser size={20} className="text-[var(--primary)]" />
+                        <h3 className="text-lg font-semibold text-white">Character Information</h3>
+                      </div>
+                      
+                      {/* Name Field */}
+                      <div>
+                        <label className="block text-sm font-medium text-white mb-2">
+                          Character Name <span className="text-red-400">*</span>
+                        </label>
+                        <input
+                          type="text"
+                          value={editForm.name}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                          className="w-full p-3 bg-[var(--dark-1)] border border-[var(--grey-0)] rounded-lg text-white placeholder-[var(--grey-2)] focus:border-[var(--primary)] outline-none transition-colors"
+                          placeholder="Enter character name (e.g., Hayeon)"
+                          autoFocus={characterManagerMode === 'create'}
+                        />
+                      </div>
 
-                  {/* Profile Picture Upload */}
-                  <ProfilePictureUpload
-                    currentAvatar={editForm.avatar}
-                    characterName={editForm.name}
-                    onAvatarUpload={handleAvatarUpload}
-                    onAvatarRemove={handleAvatarRemove}
-                    onValidationError={setImageGalleryError}
-                    disabled={false}
-                  />
+                      {/* Profile Picture Upload */}
+                      <ProfilePictureUpload
+                        currentAvatar={editForm.avatar}
+                        characterName={editForm.name}
+                        onAvatarUpload={handleAvatarUpload}
+                        onAvatarRemove={handleAvatarRemove}
+                        onValidationError={setImageGalleryError}
+                        disabled={false}
+                      />
 
-                  {/* Description Field */}
-                  <div>
-                    <label className="block text-sm font-medium text-white mb-2">
-                      Character Description
-                    </label>
-                    <textarea
-                      value={editForm.description}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
-                      className="w-full p-3 bg-[var(--dark-1)] border border-[var(--grey-0)] rounded-lg text-white placeholder-[var(--grey-2)] focus:border-[var(--primary)] outline-none transition-colors h-48 sm:h-[300px] resize-y"
-                      placeholder="Describe your character's personality, background, and role (e.g., A friendly AI assistant, A wise sorceress from the realm of Ethereal...)"
-                    />
-                    <p className="text-xs text-[var(--grey-1)] mt-1">
-                      This description will be used as the character's core personality in conversations.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Message Configuration */}
-              <div className="bg-[var(--dark-2)] rounded-lg p-4 sm:p-6 border border-[var(--grey-0)]">
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <FiMessageCircle size={20} className="text-[var(--primary)]" />
-                    <h3 className="text-lg font-semibold text-white">Conversation Settings</h3>
-                  </div>
-
-                  {/* First Message */}
-                  <div>
-                    <label className="block text-sm font-medium text-white mb-2">
-                      Welcome Message
-                    </label>
-                    <textarea
-                      value={editForm.firstMessage}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, firstMessage: e.target.value }))}
-                      className="w-full p-3 bg-[var(--dark-1)] border border-[var(--grey-0)] rounded-lg text-white placeholder-[var(--grey-2)] focus:border-[var(--primary)] outline-none transition-colors h-48 sm:h-[300px] resize-y"
-                      placeholder="The character's opening message when starting a new conversation..."
-                    />
-                    <p className="text-xs text-[var(--grey-1)] mt-1">
-                      This message will be displayed when users first interact with your character.
-                    </p>
-                  </div>
-
-                  {/* Example Dialogue */}
-                  <div>
-                    <label className="block text-sm font-medium text-white mb-2">
-                      Example Dialogue
-                    </label>
-                    <textarea
-                      value={editForm.exampleDialogue}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, exampleDialogue: e.target.value }))}
-                      className="w-full p-3 bg-[var(--dark-1)] border border-[var(--grey-0)] rounded-lg text-white placeholder-[var(--grey-2)] focus:border-[var(--primary)] outline-none transition-colors h-32 resize-y"
-                      placeholder="User: Hello!\nCharacter: *waves enthusiastically* Greetings! How may I assist you today?"
-                    />
-                    <p className="text-xs text-[var(--grey-1)] mt-1">
-                      Example conversation to help guide the character's speaking style and behavior.
-                    </p>
-                  </div>
-                </div>
-              </div>
-
-              {/* Image Gallery Section */}
-              <div className="bg-[var(--dark-2)] rounded-lg p-4 sm:p-6 border border-[var(--grey-0)]">
-                <div className="space-y-6">
-                  <div className="flex items-center gap-3 mb-6">
-                    <FiImage size={20} className="text-[var(--primary)]" />
-                    <div>
-                      <h3 className="text-lg font-semibold text-white">Image Gallery</h3>
-                      <p className="text-sm text-[var(--grey-1)]">Add images to personalize your character</p>
+                      {/* Description Field */}
+                      <div>
+                        <label className="block text-sm font-medium text-white mb-2">
+                          Character Description
+                        </label>
+                        <textarea
+                          value={editForm.description}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                          className="w-full p-3 bg-[var(--dark-1)] border border-[var(--grey-0)] rounded-lg text-white placeholder-[var(--grey-2)] focus:border-[var(--primary)] outline-none transition-colors h-48 sm:h-[300px] resize-y"
+                          placeholder="Describe your character's personality, background, and role (e.g., A friendly AI assistant, A wise sorceress from the realm of Ethereal...)"
+                        />
+                        <p className="text-xs text-[var(--grey-1)] mt-1">
+                          This description will be used as the character's core personality in conversations.
+                        </p>
+                      </div>
                     </div>
                   </div>
 
-                  {/* Gallery Mode Selector */}
-                  <GalleryModeSelector
-                    selectedMode={editForm.imageGallery.mode}
-                    onModeChange={handleGalleryModeChange}
-                  />
+                  {/* Message Configuration - Also in Basic Info Tab */}
+                  <div className="bg-[var(--dark-2)] rounded-lg p-4 sm:p-6 border border-[var(--grey-0)]">
+                    <div className="space-y-6">
+                      <div className="flex items-center gap-3 mb-6">
+                        <FiMessageCircle size={20} className="text-[var(--primary)]" />
+                        <h3 className="text-lg font-semibold text-white">Conversation Settings</h3>
+                      </div>
 
-                  {/* Image Upload Interface */}
-                  <ImageUploadInterface
-                    mode={editForm.imageGallery.mode}
-                    currentImages={editForm.imageGallery.images}
-                    onImageUpload={handleImageUpload}
-                    onValidationError={handleImageGalleryError}
-                  />
+                      {/* First Message */}
+                      <div>
+                        <label className="block text-sm font-medium text-white mb-2">
+                          Welcome Message
+                        </label>
+                        <textarea
+                          value={editForm.firstMessage}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, firstMessage: e.target.value }))}
+                          className="w-full p-3 bg-[var(--dark-1)] border border-[var(--grey-0)] rounded-lg text-white placeholder-[var(--grey-2)] focus:border-[var(--primary)] outline-none transition-colors h-48 sm:h-[300px] resize-y"
+                          placeholder="The character's opening message when starting a new conversation..."
+                        />
+                        <p className="text-xs text-[var(--grey-1)] mt-1">
+                          This message will be displayed when users first interact with your character.
+                        </p>
+                      </div>
 
-                  {/* Image Preview Grid */}
-                  {editForm.imageGallery.images.length > 0 && (
-                    <ImagePreviewGrid
+                      {/* Example Dialogue */}
+                      <div>
+                        <label className="block text-sm font-medium text-white mb-2">
+                          Example Dialogue
+                        </label>
+                        <textarea
+                          value={editForm.exampleDialogue}
+                          onChange={(e) => setEditForm(prev => ({ ...prev, exampleDialogue: e.target.value }))}
+                          className="w-full p-3 bg-[var(--dark-1)] border border-[var(--grey-0)] rounded-lg text-white placeholder-[var(--grey-2)] focus:border-[var(--primary)] outline-none transition-colors h-32 resize-y"
+                          placeholder="User: Hello!
+Character: *waves enthusiastically* Greetings! How may I assist you today?"
+                        />
+                        <p className="text-xs text-[var(--grey-1)] mt-1">
+                          Example conversation to help guide the character's speaking style and behavior.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+
+              {/* Image Gallery Section - Images Tab */}
+              {activeTab === 'images' && (
+                <div className="bg-[var(--dark-2)] rounded-lg p-4 sm:p-6 border border-[var(--grey-0)]">
+                  <div className="space-y-6">
+                    <div className="flex items-center gap-3 mb-6">
+                      <FiImage size={20} className="text-[var(--primary)]" />
+                      <div>
+                        <h3 className="text-lg font-semibold text-white">Image Gallery</h3>
+                        <p className="text-sm text-[var(--grey-1)]">Add images to personalize your character</p>
+                      </div>
+                    </div>
+
+                    {/* Gallery Mode Selector */}
+                    <GalleryModeSelector
+                      selectedMode={editForm.imageGallery.mode}
+                      onModeChange={handleGalleryModeChange}
+                    />
+
+                    {/* Image Upload Interface */}
+                    <ImageUploadInterface
                       mode={editForm.imageGallery.mode}
-                      images={editForm.imageGallery.images}
-                      activeImageIndex={editForm.imageGallery.activeImageIndex}
-                      onRemoveImage={handleImageRemove}
-                      onSetActiveImage={handleSetActiveImage}
+                      currentImages={editForm.imageGallery.images}
+                      onImageUpload={handleImageUpload}
+                      onValidationError={handleImageGalleryError}
                     />
-                  )}
 
-                  {/* Error Display */}
-                  {imageGalleryError && (
-                    <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
-                      <p className="text-red-400 text-sm">{imageGalleryError}</p>
-                    </div>
-                  )}
-                  
-                  {/* Storage Error Display */}
-                  {storageError && (
-                    <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
-                      <div className="flex items-start gap-3">
-                        <div className="text-orange-400 mt-0.5">
-                          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                          </svg>
-                        </div>
-                        <div className="flex-1">
-                          <p className="text-orange-400 text-sm font-medium mb-1">Storage Limit Reached</p>
-                          <p className="text-orange-300 text-sm">{storageError}</p>
-                          <div className="mt-3 flex gap-2">
-                            <button
-                              onClick={() => {
-                                const { cleanupLargestImages } = useChatStore.getState()
-                                cleanupLargestImages()
-                                setStorageError('')
-                              }}
-                              className="px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs rounded transition-colors"
-                            >
-                              Clean Up Images
-                            </button>
-                            <button
-                              onClick={() => setStorageError('')}
-                              className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded transition-colors"
-                            >
-                              Dismiss
-                            </button>
+                    {/* Image Preview Grid */}
+                    {editForm.imageGallery.images.length > 0 && (
+                      <ImagePreviewGrid
+                        mode={editForm.imageGallery.mode}
+                        images={editForm.imageGallery.images}
+                        activeImageIndex={editForm.imageGallery.activeImageIndex}
+                        onRemoveImage={handleImageRemove}
+                        onSetActiveImage={handleSetActiveImage}
+                      />
+                    )}
+
+                    {/* Error Display */}
+                    {imageGalleryError && (
+                      <div className="bg-red-500/10 border border-red-500/30 rounded-lg p-3">
+                        <p className="text-red-400 text-sm">{imageGalleryError}</p>
+                      </div>
+                    )}
+                    
+                    {/* Storage Error Display */}
+                    {storageError && (
+                      <div className="bg-orange-500/10 border border-orange-500/30 rounded-lg p-4">
+                        <div className="flex items-start gap-3">
+                          <div className="text-orange-400 mt-0.5">
+                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                              <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                            </svg>
+                          </div>
+                          <div className="flex-1">
+                            <p className="text-orange-400 text-sm font-medium mb-1">Storage Limit Reached</p>
+                            <p className="text-orange-300 text-sm">{storageError}</p>
+                            <div className="mt-3 flex gap-2">
+                              <button
+                                onClick={() => {
+                                  const { cleanupLargestImages } = useChatStore.getState()
+                                  cleanupLargestImages()
+                                  setStorageError('')
+                                }}
+                                className="px-3 py-1 bg-orange-600 hover:bg-orange-700 text-white text-xs rounded transition-colors"
+                              >
+                                Clean Up Images
+                              </button>
+                              <button
+                                onClick={() => setStorageError('')}
+                                className="px-3 py-1 bg-gray-600 hover:bg-gray-700 text-white text-xs rounded transition-colors"
+                              >
+                                Dismiss
+                              </button>
+                            </div>
                           </div>
                         </div>
                       </div>
-                    </div>
-                  )}
-                  
-                  {/* Compression Settings */}
-                  <div className="bg-[var(--dark-2)] rounded-lg p-4 border border-[var(--grey-0)]">
-                    <h4 className="text-sm font-medium text-white mb-3 flex items-center gap-2">
-                      <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clipRule="evenodd" />
-                      </svg>
-                      Compression Settings
-                    </h4>
-                    <div className="space-y-3 text-sm">
-                      <label className="flex items-center gap-2">
-                        <input
-                          type="checkbox"
-                          checked={compressionSettings.enabled}
-                          onChange={(e) => setCompressionSettings(prev => ({ ...prev, enabled: e.target.checked }))}
-                          className="w-4 h-4 text-[var(--primary)] bg-[var(--dark-3)] border-[var(--grey-0)] rounded focus:ring-[var(--primary)] focus:ring-2"
-                        />
-                        <span className="text-white">Enable image compression (recommended)</span>
-                      </label>
-                      {compressionSettings.enabled && (
-                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pl-6">
-                          <div>
-                            <label className="block text-xs text-[var(--grey-1)] mb-1">Max Width</label>
-                            <input
-                              type="number"
-                              value={compressionSettings.maxWidth}
-                              onChange={(e) => setCompressionSettings(prev => ({ ...prev, maxWidth: parseInt(e.target.value) }))}
-                              className="w-full px-2 py-1 bg-[var(--dark-3)] border border-[var(--grey-0)] rounded text-white text-xs"
-                              min="200"
-                              max="1920"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs text-[var(--grey-1)] mb-1">Max Height</label>
-                            <input
-                              type="number"
-                              value={compressionSettings.maxHeight}
-                              onChange={(e) => setCompressionSettings(prev => ({ ...prev, maxHeight: parseInt(e.target.value) }))}
-                              className="w-full px-2 py-1 bg-[var(--dark-3)] border border-[var(--grey-0)] rounded text-white text-xs"
-                              min="200"
-                              max="1080"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-xs text-[var(--grey-1)] mb-1">Quality ({Math.round(compressionSettings.quality * 100)}%)</label>
-                            <input
-                              type="range"
-                              value={compressionSettings.quality}
-                              onChange={(e) => setCompressionSettings(prev => ({ ...prev, quality: parseFloat(e.target.value) }))}
-                              className="w-full"
-                              min="0.1"
-                              max="1.0"
-                              step="0.1"
-                            />
-                          </div>
-                        </div>
-                      )}
-                      <p className="text-xs text-[var(--grey-2)] pl-6">
-                        Lower quality = smaller file size. Recommended: 800x600 at 80% quality.
-                      </p>
-                    </div>
+                    )}
                   </div>
-                  
-                  
                 </div>
-              </div>
+              )}
 
-              {/* Lorebook Management (only in edit mode) */}
-              {characterManagerMode === 'edit' && editingCharacterId && (
+              {/* Lorebook Management - Lorebook Tab */}
+              {characterManagerMode === 'edit' && editingCharacterId && activeTab === 'lorebook' && (
                 <div className="bg-[var(--dark-2)] rounded-lg p-4 sm:p-6 border border-[var(--grey-0)]">
                   <div className="space-y-6">
                     <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
